@@ -9,10 +9,10 @@
     <lastBuildDate>Fri, 25 Mar 2022 08:41:59 +0800</lastBuildDate><atom:link href="https://secxue.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>HellsGate</title>
-      <link>https://secxue.github.io/posts/hellsgate/</link>
+      <link>https://secxue.github.io/posts/hells-gate/</link>
       <pubDate>Fri, 25 Mar 2022 08:41:59 +0800</pubDate>
       
-      <guid>https://secxue.github.io/posts/hellsgate/</guid>
+      <guid>https://secxue.github.io/posts/hells-gate/</guid>
       <description>简介 也就是地狱之门，涉及到的前置知识是PEB。
 原理就是从内存里的ntdll中读取到的系统调用号进行系统直接调用来绕过敏感API函数的hook。主要来应对 对 Ring3 API 的 HOOK，不同版本的 Windows Nt*函数的系统调用号不同，。
 前置知识 PEB可以在 x86 进程的线程环境块(TEB)中的 fs:[0x30] 以及 x64 进程的 GS:[0x60] 中找到。
