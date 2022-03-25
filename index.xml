@@ -6,7 +6,42 @@
     <description>Recent content on Muxue Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 19 Feb 2022 20:43:56 +0800</lastBuildDate><atom:link href="https://secxue.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 25 Mar 2022 08:41:59 +0800</lastBuildDate><atom:link href="https://secxue.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HellsGate</title>
+      <link>https://secxue.github.io/posts/hellsgate/</link>
+      <pubDate>Fri, 25 Mar 2022 08:41:59 +0800</pubDate>
+      
+      <guid>https://secxue.github.io/posts/hellsgate/</guid>
+      <description>简介 也就是地狱之门，涉及到的前置知识是PEB。
+原理就是从内存里的ntdll中读取到的系统调用号进行系统直接调用来绕过敏感API函数的hook。主要来应对 对 Ring3 API 的 HOOK，不同版本的 Windows Nt*函数的系统调用号不同，。
+前置知识 PEB可以在 x86 进程的线程环境块(TEB)中的 fs:[0x30] 以及 x64 进程的 GS:[0x60] 中找到。
+这里就涉及到了两个API
+ __readgsqword __readfsqword   看名称也可以看出来fs和gs嘛
+ 可以看见TEB结构体里有PEB
+先获得TEB、PEB的地址：r $teb，r $peb
+PEB里一个属性Ldr指向了_PEB_LDR_DATA结构，这个结构里就存储着所需的信息
+InLoadOrderModuleList: 指的是模块加载的顺序 InMemoryOrderModuleList: 指的是在内存的排列顺序 InInitializationOrderModuleLists: 指的是模块初始化装载顺序
+ 那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案
+ 双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针
+所以InMemoryOrderModuleList里的Flink的地址，指向了一个LDR_DATA_TABLE_ENTRY
+Flink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink指针
+我们所需的就是_LDR_DATA_TABLE_ENTRY-&amp;gt;Flink.Flink这个地址
+如果是_LDR_DATA_TABLE_ENTRY-&amp;gt;Flink地址，就是我们第一个的模块
+ 记住0x0000014d`0a0223c0，下一个就用它
+  然后再记0x0000014d`0a0229e0，下一个用它
+ 就这样可以循环下去
+可以查看下dll载入内存的顺序
+上面用到的-0x10是啥嘞，就是为了对齐。
+这个结构如果是x86的就是8个字节，x64的就是16个字节
+使用InMemoryOrderModuleList来查找
+我们要对齐，对齐方式就是-16个字节
+如果不进行对齐的话
+ 可以看见两图 明显不一样
+ 实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。
+#include &amp;lt;iostream&amp;gt;#include &amp;lt;intrin.h&amp;gt;#include &amp;lt;Windows.h&amp;gt;#include &amp;lt;winternl.</description>
+    </item>
+    
     <item>
       <title>Use Fork Dump Lsass</title>
       <link>https://secxue.github.io/posts/use-fork-dump-lsass/</link>
