@@ -85,17 +85,6 @@ ExecBin 这个就比较简单了，
     </item>
     
     <item>
-      <title>new</title>
-      <link>https://secxue.github.io/posts/new/</link>
-      <pubDate>Fri, 01 Oct 2021 13:24:37 +0800</pubDate>
-      
-      <guid>https://secxue.github.io/posts/new/</guid>
-      <description>来到大学一个月，从入学到中秋期间才结束军训，上了一周课到了国庆.. 一切都是那么的不熟悉
-趁着到了国庆有时间，博客从hexo换到了hugo；又是浪费了一堆时间
-然后国庆期间给博客除除草</description>
-    </item>
-    
-    <item>
       <title>About</title>
       <link>https://secxue.github.io/about/</link>
       <pubDate>Fri, 01 Oct 2021 13:23:13 +0800</pubDate>
